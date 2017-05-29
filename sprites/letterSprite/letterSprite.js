@@ -1,7 +1,7 @@
 const letterSprite = {
   name:"letter",
   size: {width: 150, height: 250},
-  animationTypes: ['IDLECONSONANT1', 'IDLEVOWEL', 'IDLECONSONANT2', 'SPINCONSONANT1', 'SPINVOWEL', 'SPINCONSONANT2'],
+  animationTypes: ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3', 'SPINLETTER1', 'SPINLETTER2', 'SPINLETTER3', 'STOPLETTER1', 'STOPLETTER2', 'STOPLETTER3'],
   frames: [
     require('./a.png'), //0
     require('./b.png'), //1
@@ -33,31 +33,33 @@ const letterSprite = {
   animationIndex: function getAnimationIndex (animationType) {
     const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
+    var nw = require('../../index.android.js');
+    var letter1 = nw.letter1;
+    var letter2 = nw.letter2;
+    var letter3 = nw.letter3;
+    var c1 = alphabetList.indexOf(letter1);
+    var v = alphabetList.indexOf(letter2);
+    var c2 = alphabetList.indexOf(letter3);
+
     switch (animationType) {
-      case 'IDLECONSONANT1':
+      case 'IDLELETTER1':
         return [2];
-      case 'IDLEVOWEL':
+      case 'IDLELETTER2':
         return [0];
-      case 'IDLECONSONANT2':
+      case 'IDLELETTER3':
         return [25];
-      case 'SPINCONSONANT1':
+      case 'SPINLETTER1':
         return [2,7,16];
-      case 'SPINVOWEL':
+      case 'SPINLETTER2':
         return [0,4];
-      case 'SPINCONSONANT2':
+      case 'SPINLETTER3':
         return [2,13,19,20,25];
-      case 'STOPCONSONANT1':
-        var nw = require('../../index.android.js');
-        var consonant1 = nw.consonant1;
-        return [alphabetList.indexOf(consonant1)];
-      case 'STOPVOWEL':
-        var nw = require('../../index.android.js');
-        var vowel = nw.vowel;
-        return [alphabetList.indexOf(vowel)];
-      case 'STOPCONSONANT2':
-        var nw = require('../../index.android.js');
-        var consonant2 = nw.consonant2;
-        return [alphabetList.indexOf(consonant2)];
+      case 'STOPLETTER1':
+        return [c1];
+      case 'STOPLETTER2':
+        return [v];
+      case 'STOPLETTER3':
+        return [c2];
     }
   },
 };

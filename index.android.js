@@ -23,8 +23,8 @@ import randomstring from 'random-string';
 import AnimatedSprite from 'react-native-animated-sprite';
 import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import letterSprite from './sprites/letterSprite/letterSprite';
-
-var Sound = require('react-native-sound');
+import Sound from 'react-native-sound';
+//var Sound = require('react-native-sound');
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -55,9 +55,12 @@ var targetImage;
 var targetWord;
 var targetSound;
 
-var consonant1;
-var vowel;
-var consonant2;
+//var consonant1;
+//var vowel;
+//var consonant2;
+var letter1;
+var letter2;
+var letter3;
 
 export default class workshop_spin_wheels_1 extends Component {
 
@@ -74,7 +77,8 @@ export default class workshop_spin_wheels_1 extends Component {
     }
 
     this.activeCells = [true, true, true];
-    this.animationKeys = ["IDLECONSONANT1", "IDLEVOWEL", "IDLECONSONANT2"];
+    //this.animationKeys = ["IDLECONSONANT1", "IDLEVOWEL", "IDLECONSONANT2"];
+    this.animationKeys = ["IDLELETTER1", "IDLELETTER2", "IDLELETTER3"];
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
     this.scale = {image: 1};
@@ -128,11 +132,16 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({imageOpacity: 0});
     this.nextWord();
 
-    cells[0].animationKey = "SPINCONSONANT1";
-    cells[1].animationKey = "SPINVOWEL";
-    cells[2].animationKey = "SPINCONSONANT2";
+    cells[0].animationKey = "SPINLETTER1";
+    cells[1].animationKey = "SPINLETTER2";
+    cells[2].animationKey = "SPINLETTER3";
+    //cells[0].animationKey = "SPINCONSONANT1";
+    //cells[1].animationKey = "SPINVOWEL";
+    //cells[2].animationKey = "SPINCONSONANT2";
+
     //this.setState({imageOpacity: 0});
     //this.nextWord();
+
     cells[0].loopAnimation = true;
     cells[0].uid = randomstring({length: 7});
     cells[1].loopAnimation = true;
@@ -150,9 +159,12 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({buttonDisabled: true});
 
     var intervalId = TimerMixin.setTimeout( () => {
-      cells[0].animationKey = "STOPCONSONANT1";
-      cells[1].animationKey = "STOPVOWEL";
-      cells[2].animationKey = "STOPCONSONANT2";
+      cells[0].animationKey = "STOPLETTER1";
+      cells[1].animationKey = "STOPLETTER2";
+      cells[2].animationKey = "STOPLETTER3";
+      //cells[0].animationKey = "STOPCONSONANT1";
+      //cells[1].animationKey = "STOPVOWEL";
+      //cells[2].animationKey = "STOPCONSONANT2";
 
       cells[0].loopAnimation = true;
       cells[0].uid = randomstring({length: 7});
@@ -190,67 +202,67 @@ export default class workshop_spin_wheels_1 extends Component {
 
     var currentIndexInWheel;
     if (wheelNumber == 1) {
-      currentIndexInWheel = wheel.indexOf(consonant1);
+      currentIndexInWheel = wheel.indexOf(letter1);
     } else if (wheelNumber == 2) {
-      currentIndexInWheel = wheel.indexOf(vowel);
+      currentIndexInWheel = wheel.indexOf(letter2);
     } else {
-      currentIndexInWheel = wheel.indexOf(consonant2);
+      currentIndexInWheel = wheel.indexOf(letter3);
     }
 
     // if direction is down
     if (currentIndexInWheel > 0) {
       if (wheelNumber == 1) {
-        consonant1 = wheel[currentIndexInWheel - 1];
-        exports.consonant1 = consonant1;
-        console.log("New consonant1: " + consonant1);
+        letter1 = wheel[currentIndexInWheel - 1];
+        exports.letter1 = letter1;
+        console.log("New letter1: " + letter1);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT1";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else if (wheelNumber == 2) {
-        vowel = wheel[currentIndexInWheel - 1];
-        exports.vowel = vowel;
-        console.log("New vowel: " + vowel);
+        letter2 = wheel[currentIndexInWheel - 1];
+        exports.letter2 = letter2;
+        console.log("New letter2: " + letter2);
 
-        cells[wheelNumber - 1].animationKey = "STOPVOWEL";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else {
-        consonant2 = wheel[currentIndexInWheel - 1];
-        exports.consonant2 = consonant2;
-        console.log("New consonant2: " + consonant2);
+        letter3 = wheel[currentIndexInWheel - 1];
+        exports.letter3 = letter3;
+        console.log("New letter3: " + letter3);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT2";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
     } else {
       if (wheelNumber == 1) {
-        consonant1 = wheel[wheelLength - 1];
-        exports.consonant1 = consonant1;
-        console.log("New consonant1: " + consonant1);
+        letter1 = wheel[wheelLength - 1];
+        exports.letter1 = letter1;
+        console.log("New letter1: " + letter1);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT1";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else if (wheelNumber == 2) {
-        vowel = wheel[wheelLength - 1];
-        exports.vowel = vowel;
-        console.log("New vowel: " + vowel);
+        letter2 = wheel[wheelLength - 1];
+        exports.letter2 = letter2;
+        console.log("New letter2: " + letter2);
 
-        cells[wheelNumber - 1].animationKey = "STOPVOWEL";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else {
-        consonant2 = wheel[wheelLength - 1];
-        exports.consonant2 = consonant2;
-        console.log("New consonant2: " + consonant2);
+        letter3 = wheel[wheelLength - 1];
+        exports.letter3 = letter3;
+        console.log("New letter3: " + letter3);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT2";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
@@ -258,7 +270,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
     this.setState({cells});
     this.setState({imageOpacity: 0});
-    this.checkWord(consonant1, vowel, consonant2);
+    this.checkWord(letter1, letter2, letter3);
 
   }
 
@@ -273,67 +285,67 @@ export default class workshop_spin_wheels_1 extends Component {
 
     var currentIndexInWheel;
     if (wheelNumber == 1) {
-      currentIndexInWheel = wheel.indexOf(consonant1);
+      currentIndexInWheel = wheel.indexOf(letter1);
     } else if (wheelNumber == 2) {
-      currentIndexInWheel = wheel.indexOf(vowel);
+      currentIndexInWheel = wheel.indexOf(letter2);
     } else {
-      currentIndexInWheel = wheel.indexOf(consonant2);
+      currentIndexInWheel = wheel.indexOf(letter3);
     }
 
     // if direction is up
     if (currentIndexInWheel < (wheelLength - 1)) {
       if (wheelNumber == 1) {
-        consonant1 = wheel[currentIndexInWheel + 1];
-        exports.consonant1 = consonant1;
-        console.log("New consonant1: " + consonant1);
+        letter1 = wheel[currentIndexInWheel + 1];
+        exports.letter1 = letter1;
+        console.log("New letter1: " + letter1);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT1";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else if (wheelNumber == 2) {
-        vowel = wheel[currentIndexInWheel + 1];
-        exports.vowel = vowel;
-        console.log("New vowel: " + vowel);
+        letter2 = wheel[currentIndexInWheel + 1];
+        exports.letter2 = letter2;
+        console.log("New letter2: " + letter2);
 
-        cells[wheelNumber - 1].animationKey = "STOPVOWEL";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else {
-        consonant2 = wheel[currentIndexInWheel + 1];
-        exports.consonant2 = consonant2;
-        console.log("New consonant2: " + consonant2);
+        letter3 = wheel[currentIndexInWheel + 1];
+        exports.letter3 = letter3;
+        console.log("New letter3: " + letter3);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT2";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
     } else {
       if (wheelNumber == 1) {
-        consonant1 = wheel[0];
-        exports.consonant1 = consonant1;
-        console.log("New consonant1: " + consonant1);
+        letter1 = wheel[0];
+        exports.letter1 = letter1;
+        console.log("New letter1: " + letter1);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT1";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else if (wheelNumber == 2) {
-        vowel = wheel[0];
-        exports.vowel = vowel;
-        console.log("New vowel: " + vowel);
+        letter2 = wheel[0];
+        exports.letter2 = letter2;
+        console.log("New letter2: " + letter2);
 
-        cells[wheelNumber - 1].animationKey = "STOPVOWEL";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
 
       } else {
-        consonant2 = wheel[0];
-        exports.consonant2 = consonant2;
-        console.log("New consonant2: " + consonant2);
+        letter3 = wheel[0];
+        exports.letter3 = letter3;
+        console.log("New letter3: " + letter3);
 
-        cells[wheelNumber - 1].animationKey = "STOPCONSONANT2";
+        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
         cells[wheelNumber - 1].loopAnimation = true;
         cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
@@ -342,12 +354,12 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({cells});
     this.setState({imageOpacity: 0});
     //this.setState({buttonDisabled: true});
-    this.checkWord(consonant1, vowel, consonant2);
+    this.checkWord(letter1, letter2, letter3);
 
   }
 
-  checkWord(letter1, letter2, letter3) {
-    var newWord = letter1 + letter2 + letter3;
+  checkWord(l1, l2, l3) {
+    var newWord = l1 + l2 + l3;
     var newWordInList = (targetWordList.indexOf(newWord) > -1);
     console.log("New Word: " + newWord);
     console.log("Is word in List: " + newWordInList);
@@ -364,16 +376,16 @@ export default class workshop_spin_wheels_1 extends Component {
     targetWord = targetWordList[Math.floor(Math.random() * targetWordList.length)];
     var targetWordArray = targetWord.split("");
 
-    consonant1 = targetWordArray[0];
-    vowel = targetWordArray[1];
-    consonant2 = targetWordArray[2];
+    letter1 = targetWordArray[0];
+    letter2 = targetWordArray[1];
+    letter3 = targetWordArray[2];
 
     targetImage = targetWord + ".jpg";
     targetSound = targetWord + ".wav";
 
-    exports.consonant1 = consonant1;
-    exports.vowel = vowel;
-    exports.consonant2 = consonant2;
+    exports.letter1 = letter1;
+    exports.letter2 = letter2;
+    exports.letter3 = letter3;
   }
 
   splitWords(listofwords) {
