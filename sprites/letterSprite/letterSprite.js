@@ -40,6 +40,17 @@ const letterSprite = {
     var wheelLetters1 = nw.wheelLetters1;
     var wheelLetters2 = nw.wheelLetters2;
     var wheelLetters3 = nw.wheelLetters3;
+    var wheel1 = [];
+    var wheel2 = [];
+    var wheel3 = [];
+
+    function getWheelLetters(wheelNumber) {
+      var wheelLength = (eval("wheelLetters" + 1)).length;
+      for (i=0; i<wheelLength; i++) {
+        (eval('wheel'+ 1)).push(alphabetList.indexOf((eval("wheelLetters" + 1))[i]));
+      }
+      return eval('wheel' + 1);
+    }
 
     switch (animationType) {
       case 'IDLELETTER1':
@@ -50,28 +61,14 @@ const letterSprite = {
         return [25];
       case 'SPINLETTER1':
         //return [2,7,16];
-        var wheel1 = [];
-        for (i=0; i<wheelLetters1.length; i++) {
-          wheel1.push(alphabetList.indexOf(wheelLetters1[i]));
-        }
-        wheel1.sort();
-        return wheel1;
+        return getWheelLetters(1);
       case 'SPINLETTER2':
         //return [0,4];
-        var wheel2 = [];
-        for (i=0; i<wheelLetters2.length; i++) {
-          wheel2.push(alphabetList.indexOf(wheelLetters2[i]));
-        }
-        wheel2.sort();
-        return wheel2;
+        return getWheelLetters(2);
+        ///return wheel2;
       case 'SPINLETTER3':
         //return [2,13,19,20,25];
-        var wheel3 = [];
-        for (i=0; i<wheelLetters3.length; i++) {
-          wheel3.push(alphabetList.indexOf(wheelLetters3[i]));
-        }
-        wheel3.sort();
-        return wheel3;
+        return getWheelLetters(3);
       case 'STOPLETTER1':
         //return [c1];
         return [alphabetList.indexOf(letter1)];
