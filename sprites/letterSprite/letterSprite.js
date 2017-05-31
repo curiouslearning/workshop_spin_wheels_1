@@ -37,9 +37,9 @@ const letterSprite = {
     var letter1 = nw.letter1;
     var letter2 = nw.letter2;
     var letter3 = nw.letter3;
-    var c1 = alphabetList.indexOf(letter1);
-    var v = alphabetList.indexOf(letter2);
-    var c2 = alphabetList.indexOf(letter3);
+    var wheelLetters1 = nw.wheelLetters1;
+    var wheelLetters2 = nw.wheelLetters2;
+    var wheelLetters3 = nw.wheelLetters3;
 
     switch (animationType) {
       case 'IDLELETTER1':
@@ -49,17 +49,38 @@ const letterSprite = {
       case 'IDLELETTER3':
         return [25];
       case 'SPINLETTER1':
-        return [2,7,16];
+        //return [2,7,16];
+        var wheel1 = [];
+        for (i=0; i<wheelLetters1.length; i++) {
+          wheel1.push(alphabetList.indexOf(wheelLetters1[i]));
+        }
+        wheel1.sort();
+        return wheel1;
       case 'SPINLETTER2':
-        return [0,4];
+        //return [0,4];
+        var wheel2 = [];
+        for (i=0; i<wheelLetters2.length; i++) {
+          wheel2.push(alphabetList.indexOf(wheelLetters2[i]));
+        }
+        wheel2.sort();
+        return wheel2;
       case 'SPINLETTER3':
-        return [2,13,19,20,25];
+        //return [2,13,19,20,25];
+        var wheel3 = [];
+        for (i=0; i<wheelLetters3.length; i++) {
+          wheel3.push(alphabetList.indexOf(wheelLetters3[i]));
+        }
+        wheel3.sort();
+        return wheel3;
       case 'STOPLETTER1':
-        return [c1];
+        //return [c1];
+        return [alphabetList.indexOf(letter1)];
       case 'STOPLETTER2':
-        return [v];
+        //return [v];
+        return [alphabetList.indexOf(letter2)];
       case 'STOPLETTER3':
-        return [c2];
+        //return [c2];
+        return [alphabetList.indexOf(letter3)];
     }
   },
 };

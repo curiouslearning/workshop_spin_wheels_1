@@ -22,8 +22,10 @@ import _ from 'lodash';
 import randomstring from 'random-string';
 import AnimatedSprite from 'react-native-animated-sprite';
 import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
-import letterSprite from './sprites/letterSprite/letterSprite';
 import Sound from 'react-native-sound';
+import letterSprite from './sprites/letterSprite/letterSprite';
+import spinWheelsJson from './spin_wheels';
+
 //var Sound = require('react-native-sound');
 
 const screenWidth = Dimensions.get('window').width;
@@ -88,6 +90,11 @@ export default class workshop_spin_wheels_1 extends Component {
 
     this.splitWords();
     this.addConsonant();
+
+    //exports.wheelLetters1;
+    //exports.wheelLetters2;
+    //exports.wheelLetters3;
+
   }
 
   componentWillMount () {
@@ -191,82 +198,12 @@ export default class workshop_spin_wheels_1 extends Component {
     }, 100);
   }
 
-  onArrowClickDown(wheelNumber) {
+  stopIndividualWheels (wheelNumber) {
     const cells = _.cloneDeep(this.state.cells);
 
-    var wheel = eval("wheelLetters" + wheelNumber);
-    var wheelLength = wheel.length;
-
-    //console.log("Wheel" + wheelNumber + ": " + wheel);
-    //console.log("WheelLength: " + wheelLength);
-
-    var currentIndexInWheel;
-    if (wheelNumber == 1) {
-      currentIndexInWheel = wheel.indexOf(letter1);
-    } else if (wheelNumber == 2) {
-      currentIndexInWheel = wheel.indexOf(letter2);
-    } else {
-      currentIndexInWheel = wheel.indexOf(letter3);
-    }
-
-    // if direction is down
-    if (currentIndexInWheel > 0) {
-      if (wheelNumber == 1) {
-        letter1 = wheel[currentIndexInWheel - 1];
-        exports.letter1 = letter1;
-        console.log("New letter1: " + letter1);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-      } else if (wheelNumber == 2) {
-        letter2 = wheel[currentIndexInWheel - 1];
-        exports.letter2 = letter2;
-        console.log("New letter2: " + letter2);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-      } else {
-        letter3 = wheel[currentIndexInWheel - 1];
-        exports.letter3 = letter3;
-        console.log("New letter3: " + letter3);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-      }
-    } else {
-      if (wheelNumber == 1) {
-        letter1 = wheel[wheelLength - 1];
-        exports.letter1 = letter1;
-        console.log("New letter1: " + letter1);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-      } else if (wheelNumber == 2) {
-        letter2 = wheel[wheelLength - 1];
-        exports.letter2 = letter2;
-        console.log("New letter2: " + letter2);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-      } else {
-        letter3 = wheel[wheelLength - 1];
-        exports.letter3 = letter3;
-        console.log("New letter3: " + letter3);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
-      }
-    }
+    cells[wheelNumber - 1].animationKey = "STOPLETTER" + wheelNumber;
+    cells[wheelNumber - 1].loopAnimation = true;
+    cells[wheelNumber - 1].uid = randomstring({length: 7});
 
     this.setState({cells});
     this.setState({imageOpacity: 0});
@@ -274,87 +211,117 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
-  onArrowClickUp(wheelNumber) {
-    const cells = _.cloneDeep(this.state.cells);
-
-    var wheel = eval("wheelLetters" + wheelNumber);
-    var wheelLength = wheel.length;
-
-    //console.log("Wheel" + wheelNumber + ": " + wheel);
-    //console.log("WheelLength: " + wheelLength);
-
-    var currentIndexInWheel;
+  // test function only
+  getCurrentIndex (wheelNumber) {
     if (wheelNumber == 1) {
-      currentIndexInWheel = wheel.indexOf(letter1);
+      letter1 = "";
+      exports.letter1 = letter1;
+      this.stopIndividualWheels(wheelNumber);
     } else if (wheelNumber == 2) {
-      currentIndexInWheel = wheel.indexOf(letter2);
+      letter2 = "";
+      exports.letter2 = letter2;
+      this.stopIndividualWheels(wheelNumber);
     } else {
-      currentIndexInWheel = wheel.indexOf(letter3);
+      letter3 = "";
+      exports.letter3 = letter3;
+      this.stopIndividualWheels(wheelNumber);
     }
 
-    // if direction is up
+  }
+
+  onArrowClickDown (wheelNumber) {
+    var wheel = eval("wheelLetters" + wheelNumber);
+    var wheelLength = wheel.length;
+    var currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
+
+    console.log("CurrentIndex: " + currentIndexInWheel);
+    console.log("WheelLength: " + wheelLength);
+    console.log("WheelLength: " + (wheelLength-1));
+
+    // if direction is down
     if (currentIndexInWheel < (wheelLength - 1)) {
       if (wheelNumber == 1) {
         letter1 = wheel[currentIndexInWheel + 1];
         exports.letter1 = letter1;
-        console.log("New letter1: " + letter1);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
+        this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[currentIndexInWheel + 1];
         exports.letter2 = letter2;
-        console.log("New letter2: " + letter2);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
+        this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[currentIndexInWheel + 1];
         exports.letter3 = letter3;
-        console.log("New letter3: " + letter3);
+        this.stopIndividualWheels(wheelNumber);
 
-        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
+
     } else {
+
       if (wheelNumber == 1) {
         letter1 = wheel[0];
         exports.letter1 = letter1;
-        console.log("New letter1: " + letter1);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER1";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
+        this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[0];
         exports.letter2 = letter2;
-        console.log("New letter2: " + letter2);
-
-        cells[wheelNumber - 1].animationKey = "STOPLETTER2";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
+        this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[0];
         exports.letter3 = letter3;
-        console.log("New letter3: " + letter3);
+        this.stopIndividualWheels(wheelNumber);
 
-        cells[wheelNumber - 1].animationKey = "STOPLETTER3";
-        cells[wheelNumber - 1].loopAnimation = true;
-        cells[wheelNumber - 1].uid = randomstring({length: 7});
       }
     }
 
-    this.setState({cells});
-    this.setState({imageOpacity: 0});
+  }
+
+  onArrowClickUp(wheelNumber) {
+    var wheel = eval("wheelLetters" + wheelNumber);
+    var wheelLength = wheel.length;
+    var currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
+
+    // if direction is up
+    if (currentIndexInWheel > 0) {
+      if (wheelNumber == 1) {
+        letter1 = wheel[currentIndexInWheel - 1];
+        exports.letter1 = letter1;
+        this.stopIndividualWheels(wheelNumber);
+
+      } else if (wheelNumber == 2) {
+        letter2 = wheel[currentIndexInWheel - 1];
+        exports.letter2 = letter2;
+        this.stopIndividualWheels(wheelNumber);
+
+      } else {
+        letter3 = wheel[currentIndexInWheel - 1];
+        exports.letter3 = letter3;
+        this.stopIndividualWheels(wheelNumber);
+
+      }
+
+    } else {
+      if (wheelNumber == 1) {
+        letter1 = wheel[wheelLength - 1];
+        exports.letter1 = letter1;
+        this.stopIndividualWheels(wheelNumber);
+
+      } else if (wheelNumber == 2) {
+        letter2 = wheel[wheelLength - 1];
+        exports.letter2 = letter2;
+        this.stopIndividualWheels(wheelNumber);
+
+      } else {
+        letter3 = wheel[wheelLength - 1];
+        exports.letter3 = letter3;
+        this.stopIndividualWheels(wheelNumber);
+
+      }
+    }
     //this.setState({buttonDisabled: true});
-    this.checkWord(letter1, letter2, letter3);
 
   }
 
@@ -369,6 +336,7 @@ export default class workshop_spin_wheels_1 extends Component {
       targetSound = targetWord + ".wav";
       this.setState({imageOpacity: 1});
       this.setState({buttonDisabled: false});
+      this.onSpinButtonPress();
     }
   }
 
@@ -388,22 +356,53 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.letter3 = letter3;
   }
 
+
+  splitWords(listofwords) {
+    var wheelLettersH1 = [];
+    var wheelLettersH2 = [];
+    var wheelLettersH3 = [];
+
+    for(i=0;i<targetWordList.length;i++) {
+      var tempWordArray = [];
+      tempWordArray = targetWordList[i].split("");
+      for(j=0; j<tempWordArray.length; j++) {
+        eval("wheelLettersH"+(j+1)).push(tempWordArray[j]);
+        eval("wheelLettersH"+(j+1)).sort();
+      }
+    }
+    //console.log("wheelLettersH1: " + wheelLettersH1);
+    wheelLetters1 = [...new Set(wheelLettersH1)];
+    wheelLetters2 = [...new Set(wheelLettersH2)];
+    wheelLetters3 = [...new Set(wheelLettersH3)];
+    //console.log("wheelLetters1: " + wheelLetters1);
+
+  }
+
+
+/*
   splitWords(listofwords) {
     for(i=0;i<wordList.length;i++) {
       var tempWordArray = [];
       tempWordArray = wordList[i].split("");
-      for(j=0; j<3; j++) {
+      for(j=0; j<tempWordArray.length; j++) {
         eval("wheelLetters"+(j+1)).push(tempWordArray[j]);
         eval("wheelLetters"+(j+1)).sort();
       }
     }
+    console.log("wheelLetters1: " + wheelLetters1);
   }
+*/
 
   addConsonant() {
     wheelLetters1.push("q");
     wheelLetters3.push("c","u","z");
     wheelLetters1.sort();
     wheelLetters3.sort();
+
+    exports.wheelLetters1 = wheelLetters1;
+    exports.wheelLetters2 = wheelLetters2;
+    exports.wheelLetters3 = wheelLetters3;
+
   }
 
   onSpinButtonPress () {
