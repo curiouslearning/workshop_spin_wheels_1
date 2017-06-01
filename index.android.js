@@ -25,6 +25,8 @@ import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import Sound from 'react-native-sound';
 import letterSprite from './sprites/letterSprite/letterSprite';
 import spinWheelsJson from './spin_wheels';
+import wordImages from './wordimages';
+import wordSounds from './wordsounds';
 
 //var Sound = require('react-native-sound');
 
@@ -32,22 +34,24 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
-const wordImages = {
-  'can': require('./images/can.jpg'),
-  'cat': require('./images/cat.jpg'),
-  'hat': require('./images/hat.jpg'),
-  'hen': require('./images/hen.jpg'),
-}
+//const wordImages = {
+//  'can': require('./images/can.jpg'),
+//  'cat': require('./images/cat.jpg'),
+//  'hat': require('./images/hat.jpg'),
+//  'hen': require('./images/hen.jpg'),
+//}
 
-const wordSounds = {
-  'can': require('./audio/can.wav'),
-  'cat': require('./audio/cat.wav'),
-  'hat': require('./audio/hat.wav'),
-  'hen': require('./audio/hen.wav'),
-}
+//const wordSounds = {
+//  'can': require('./audio/can.wav'),
+//  'cat': require('./audio/cat.wav'),
+//  'hat': require('./audio/hat.wav'),
+//  'hen': require('./audio/hen.wav'),
+//}
 
-var targetWordList = ["cat", "can", "hat", "hen"];
-var wordList = ["cat", "hen"];
+var targetWordList
+
+//var targetWordList = ["cat", "can", "hat", "hen"];
+//var wordList = ["cat", "hen"];
 
 var wheelLetters1 = [];
 var wheelLetters2 = [];
@@ -57,12 +61,11 @@ var targetImage;
 var targetWord;
 var targetSound;
 
-//var consonant1;
-//var vowel;
-//var consonant2;
 var letter1;
 var letter2;
 var letter3;
+
+//var wordListLevel;
 
 export default class workshop_spin_wheels_1 extends Component {
 
@@ -76,10 +79,10 @@ export default class workshop_spin_wheels_1 extends Component {
       spinButtonDisabled: false,
       spinButtonBackgroundColor: 'royalblue',
       spinButtonTextOpacity: 1,
+      wordListLevel: 1
     }
 
     this.activeCells = [true, true, true];
-    //this.animationKeys = ["IDLECONSONANT1", "IDLEVOWEL", "IDLECONSONANT2"];
     this.animationKeys = ["IDLELETTER1", "IDLELETTER2", "IDLELETTER3"];
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
@@ -88,12 +91,24 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numColumns = 3;
     this.numRows = 1;
 
-    this.splitWords();
-    this.addConsonant();
+    //this.splitWords();
+    //this.addConsonant();
 
-    //exports.wheelLetters1;
-    //exports.wheelLetters2;
-    //exports.wheelLetters3;
+    targetWordList = spinWheelsJson[0].word_list;
+    wheelLetters1 = spinWheelsJson[0].spinners[0].spinner1.letter_list;
+    wheelLetters2 = spinWheelsJson[0].spinners[1].spinner2.letter_list;
+    wheelLetters3 = spinWheelsJson[0].spinners[2].spinner3.letter_list;
+
+    exports.wheelLetters1 = wheelLetters1;
+    exports.wheelLetters2 = wheelLetters2;
+    exports.wheelLetters3 = wheelLetters3;
+
+    console.log('Json total items: ' + spinWheelsJson.length);
+    console.log('Json level: ' + spinWheelsJson[0].level_id);
+    console.log('Json word list: ' + spinWheelsJson[0].word_list);
+    console.log('Json spinner1: ' + spinWheelsJson[0].spinners[0].spinner1.letter_list);
+    console.log('Json spinner2: ' + spinWheelsJson[0].spinners[1].spinner2.letter_list);
+    console.log('Json spinner3: ' + spinWheelsJson[0].spinners[2].spinner3.letter_list);
 
   }
 
@@ -142,12 +157,6 @@ export default class workshop_spin_wheels_1 extends Component {
     cells[0].animationKey = "SPINLETTER1";
     cells[1].animationKey = "SPINLETTER2";
     cells[2].animationKey = "SPINLETTER3";
-    //cells[0].animationKey = "SPINCONSONANT1";
-    //cells[1].animationKey = "SPINVOWEL";
-    //cells[2].animationKey = "SPINCONSONANT2";
-
-    //this.setState({imageOpacity: 0});
-    //this.nextWord();
 
     cells[0].loopAnimation = true;
     cells[0].uid = randomstring({length: 7});
@@ -169,9 +178,6 @@ export default class workshop_spin_wheels_1 extends Component {
       cells[0].animationKey = "STOPLETTER1";
       cells[1].animationKey = "STOPLETTER2";
       cells[2].animationKey = "STOPLETTER3";
-      //cells[0].animationKey = "STOPCONSONANT1";
-      //cells[1].animationKey = "STOPVOWEL";
-      //cells[2].animationKey = "STOPCONSONANT2";
 
       cells[0].loopAnimation = true;
       cells[0].uid = randomstring({length: 7});
@@ -377,21 +383,6 @@ export default class workshop_spin_wheels_1 extends Component {
     //console.log("wheelLetters1: " + wheelLetters1);
 
   }
-
-
-/*
-  splitWords(listofwords) {
-    for(i=0;i<wordList.length;i++) {
-      var tempWordArray = [];
-      tempWordArray = wordList[i].split("");
-      for(j=0; j<tempWordArray.length; j++) {
-        eval("wheelLetters"+(j+1)).push(tempWordArray[j]);
-        eval("wheelLetters"+(j+1)).sort();
-      }
-    }
-    console.log("wheelLetters1: " + wheelLetters1);
-  }
-*/
 
   addConsonant() {
     wheelLetters1.push("q");

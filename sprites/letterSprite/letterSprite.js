@@ -32,6 +32,8 @@ const letterSprite = {
   ],
   animationIndex: function getAnimationIndex (animationType) {
     const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+    const consonants =  [1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25];
+    const vowels = [0,4,8,14,20];
 
     var nw = require('../../index.android.js');
     var letter1 = nw.letter1;
@@ -61,14 +63,17 @@ const letterSprite = {
         return [25];
       case 'SPINLETTER1':
         //return [2,7,16];
-        return getWheelLetters(1);
+        //return getWheelLetters(1);
+        return consonants.sort(function(a,b){return 0.5 - Math.random()});
       case 'SPINLETTER2':
         //return [0,4];
-        return getWheelLetters(2);
+        return vowels;
+        //return getWheelLetters(2);
         ///return wheel2;
       case 'SPINLETTER3':
         //return [2,13,19,20,25];
-        return getWheelLetters(3);
+        //return getWheelLetters(3);
+        return consonants.sort(function(a,b){return 0.5 - Math.random()});
       case 'STOPLETTER1':
         //return [c1];
         return [alphabetList.indexOf(letter1)];
