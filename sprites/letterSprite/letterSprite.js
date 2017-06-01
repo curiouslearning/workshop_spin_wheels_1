@@ -1,7 +1,7 @@
 const letterSprite = {
   name:"letter",
   size: {width: 150, height: 250},
-  animationTypes: ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3', 'SPINLETTER1', 'SPINLETTER2', 'SPINLETTER3', 'STOPLETTER1', 'STOPLETTER2', 'STOPLETTER3'],
+  //animationTypes: ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3', 'SPINLETTER1', 'SPINLETTER2', 'SPINLETTER3', 'STOPLETTER1', 'STOPLETTER2', 'STOPLETTER3'],
   frames: [
     require('./a.png'), //0
     require('./b.png'), //1

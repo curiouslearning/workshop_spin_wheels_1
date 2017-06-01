@@ -65,6 +65,8 @@ var letter1;
 var letter2;
 var letter3;
 
+var wordsCompleted;
+
 //var wordListLevel;
 
 export default class workshop_spin_wheels_1 extends Component {
@@ -79,7 +81,6 @@ export default class workshop_spin_wheels_1 extends Component {
       spinButtonDisabled: false,
       spinButtonBackgroundColor: 'royalblue',
       spinButtonTextOpacity: 1,
-      wordListLevel: 1
     }
 
     this.activeCells = [true, true, true];
@@ -90,6 +91,8 @@ export default class workshop_spin_wheels_1 extends Component {
     this.cellSpriteScale = 1;
     this.numColumns = 3;
     this.numRows = 1;
+
+    wordsCompleted = 0;
 
     //this.splitWords();
     //this.addConsonant();
@@ -103,12 +106,12 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.wheelLetters2 = wheelLetters2;
     exports.wheelLetters3 = wheelLetters3;
 
-    console.log('Json total items: ' + spinWheelsJson.length);
-    console.log('Json level: ' + spinWheelsJson[0].level_id);
-    console.log('Json word list: ' + spinWheelsJson[0].word_list);
-    console.log('Json spinner1: ' + spinWheelsJson[0].spinners[0].spinner1.letter_list);
-    console.log('Json spinner2: ' + spinWheelsJson[0].spinners[1].spinner2.letter_list);
-    console.log('Json spinner3: ' + spinWheelsJson[0].spinners[2].spinner3.letter_list);
+    //console.log('Json total items: ' + spinWheelsJson.length);
+    //console.log('Json level: ' + spinWheelsJson[0].level_id);
+    //console.log('Json word list: ' + spinWheelsJson[0].word_list);
+    //console.log('Json spinner1: ' + spinWheelsJson[0].spinners[0].spinner1.letter_list);
+    //console.log('Json spinner2: ' + spinWheelsJson[0].spinners[1].spinner2.letter_list);
+    //console.log('Json spinner3: ' + spinWheelsJson[0].spinners[2].spinner3.letter_list);
 
   }
 
@@ -144,6 +147,9 @@ export default class workshop_spin_wheels_1 extends Component {
     return {width, height};
   }
 
+  // Function called by Spin Button to spin the wheels
+  // A word from the target word list will be selected
+  // via the nextWord() function
   cellPressed (cellObj, position) {
     const cells = _.cloneDeep(this.state.cells);
 
@@ -170,6 +176,9 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
+  // This function is called to stop the wheels from spinning
+  // The word created by the wheels will be checked against the
+  // target word list via the checkWord function
   stopWheels() {
     const cells = _.cloneDeep(this.state.cells);
     this.setState({buttonDisabled: true});
@@ -187,23 +196,29 @@ export default class workshop_spin_wheels_1 extends Component {
       cells[2].uid = randomstring({length: 7});
 
       this.setState({cells});
+      this.checkWord(letter1, letter2, letter3);
       this.onStopWheelsSetState();
     }, 2500);
 
   }
 
+  // Set the state of buttons and images when the wheels stop spinning
   onStopWheelsSetState() {
     var timeoutId = TimerMixin.setTimeout( () => {
       this.setState({imageOpacity: 1});
-      this.setState({buttonImageOpacity: 1});
+      //this.setState({buttonImageOpacity: 1});
       this.setState({buttonDisabled: false});
       this.setState({spinButtonDisabled: false});
       this.setState({spinButtonBackgroundColor: 'royalblue'});
       this.setState({spinButtonTextOpacity: 1});
-      this.onSpinButtonPress();
+      //this.onSpinButtonPress();
     }, 100);
   }
 
+  // Function to stop the wheels individually. This function
+  // is called by the Up and Down arrows. The word created by the
+  // three wheels will be checked against the target word list via
+  // the checkWord function
   stopIndividualWheels (wheelNumber) {
     const cells = _.cloneDeep(this.state.cells);
 
@@ -235,16 +250,13 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
+  // Function for the Down arrow buttons. This will spin the respective
+  // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
     var wheel = eval("wheelLetters" + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
 
-    console.log("CurrentIndex: " + currentIndexInWheel);
-    console.log("WheelLength: " + wheelLength);
-    console.log("WheelLength: " + (wheelLength-1));
-
-    // if direction is down
     if (currentIndexInWheel < (wheelLength - 1)) {
       if (wheelNumber == 1) {
         letter1 = wheel[currentIndexInWheel + 1];
@@ -285,12 +297,13 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
+  // Function for the Down arrow buttons. This will spin the respective
+  // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
     var wheel = eval("wheelLetters" + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
 
-    // if direction is up
     if (currentIndexInWheel > 0) {
       if (wheelNumber == 1) {
         letter1 = wheel[currentIndexInWheel - 1];
@@ -327,25 +340,34 @@ export default class workshop_spin_wheels_1 extends Component {
 
       }
     }
-    //this.setState({buttonDisabled: true});
 
   }
 
+  // Function to check if the word created by the wheels are in the
+  // target word list. If yes, the image will show and the audio will play
   checkWord(l1, l2, l3) {
     var newWord = l1 + l2 + l3;
     var newWordInList = (targetWordList.indexOf(newWord) > -1);
     console.log("New Word: " + newWord);
     console.log("Is word in List: " + newWordInList);
 
+    //var wordListLength = targetWordList.length;
+    //var percentCompleted = (wordsCompleted/wordListLength) * 100;
+    //console.log(percentCompleted);
+
     if (newWordInList == true) {
+      //wordsCompleted = wordsCompleted + 1;
       targetWord = newWord;
+      //targetImage = targetWord + ".jpg";
       targetSound = targetWord + ".wav";
       this.setState({imageOpacity: 1});
-      this.setState({buttonDisabled: false});
+      //this.setState({buttonDisabled: false});
       this.onSpinButtonPress();
+      //this.onStopWheelsSetState();
     }
   }
 
+  // randomly select a word from the target word list
   nextWord() {
     targetWord = targetWordList[Math.floor(Math.random() * targetWordList.length)];
     var targetWordArray = targetWord.split("");
@@ -354,7 +376,7 @@ export default class workshop_spin_wheels_1 extends Component {
     letter2 = targetWordArray[1];
     letter3 = targetWordArray[2];
 
-    targetImage = targetWord + ".jpg";
+    //targetImage = targetWord + ".jpg";
     targetSound = targetWord + ".wav";
 
     exports.letter1 = letter1;
@@ -362,8 +384,12 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.letter3 = letter3;
   }
 
-
-  splitWords(listofwords) {
+  // Function to split each word in the target word list into individual letters.
+  // The first letter of each word will be assigned to wheel 1, the second letter
+  // to wheel 2, and the third letter to wheel 3. This function was used in the
+  // beginning when JSON was not used.
+  // Currently not used
+  splitWords() {
     var wheelLettersH1 = [];
     var wheelLettersH2 = [];
     var wheelLettersH3 = [];
@@ -376,14 +402,16 @@ export default class workshop_spin_wheels_1 extends Component {
         eval("wheelLettersH"+(j+1)).sort();
       }
     }
-    //console.log("wheelLettersH1: " + wheelLettersH1);
+
     wheelLetters1 = [...new Set(wheelLettersH1)];
     wheelLetters2 = [...new Set(wheelLettersH2)];
     wheelLetters3 = [...new Set(wheelLettersH3)];
-    //console.log("wheelLetters1: " + wheelLetters1);
 
   }
 
+  // Function to add additional consonants to wheel1 and wheel2
+  // This function was used in the beginning when JSON was not used.
+  // Currently unused
   addConsonant() {
     wheelLetters1.push("q");
     wheelLetters3.push("c","u","z");
@@ -396,23 +424,20 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
+  // Function to play an audio of the word formed by the wheels
   onSpinButtonPress () {
-    // Load the sound file 'whoosh.mp3' from the app bundle
-    // See notes below about preloading sounds within initialization code below.
-
-    //var whoosh = new Sound(soundFile, Sound.MAIN_BUNDLE, (error) => {
-    //var whoosh = new Sound('pig.wav', Sound.MAIN_BUNDLE, (error) => {
+    // Load the sound file variable, targetSound
     var whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
       if (error) {
         console.log('Failed to load the sound', error);
         return;
       } else {
         // loaded successfully
-        //console.log('Duration in seconds: ' + whoosh.getDuration() + 'Number of channels: ' + whoosh.getNumberOfChannels())
         whoosh.play((success) => {
           if (success) {
             whoosh.release();
             console.log('successfully finished playing');
+            //console.log('Duration in seconds: ' + whoosh.getDuration() + 'Number of channels: ' + whoosh.getNumberOfChannels())
           } else {
             console.log('playback failed due to audio decoding errors');
           }
