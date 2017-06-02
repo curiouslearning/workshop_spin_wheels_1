@@ -28,8 +28,6 @@ import spinWheelsJson from './spin_wheels';
 import wordImages from './wordimages';
 import wordSounds from './wordsounds';
 
-//var Sound = require('react-native-sound');
-
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
@@ -79,29 +77,10 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numRows = 1;
 
     wordListLevel = 0;
-    //wordsCompleted = 0;
-    //wordsShown = [];
-
     this.selectWordList();
 
     //this.splitWords();
     //this.addConsonant();
-
-    //targetWordList = spinWheelsJson[0].word_list;
-    //wheelLetters1 = spinWheelsJson[0].spinners[0].spinner1.letter_list;
-    //wheelLetters2 = spinWheelsJson[0].spinners[1].spinner2.letter_list;
-    //wheelLetters3 = spinWheelsJson[0].spinners[2].spinner3.letter_list;
-
-    //exports.wheelLetters1 = wheelLetters1;
-    //exports.wheelLetters2 = wheelLetters2;
-    //exports.wheelLetters3 = wheelLetters3;
-
-    //console.log('Json total items: ' + spinWheelsJson.length);
-    //console.log('Json level: ' + spinWheelsJson[0].level_id);
-    //console.log('Json word list: ' + spinWheelsJson[0].word_list);
-    //console.log('Json spinner1: ' + spinWheelsJson[0].spinners[0].spinner1.letter_list);
-    //console.log('Json spinner2: ' + spinWheelsJson[0].spinners[1].spinner2.letter_list);
-    //console.log('Json spinner3: ' + spinWheelsJson[0].spinners[2].spinner3.letter_list);
 
   }
 
@@ -368,7 +347,10 @@ export default class workshop_spin_wheels_1 extends Component {
     console.log('Percent completed: ' + percentCompleted);
     console.log('wordsShown[]: ' + wordsShown);
 
-    if (percentCompleted >= 20) {
+    // Checks if 50% of word list has been formed
+    // If yes, word list is changed to the next level
+    // Currently, the lists are being rotated i.e. 1 to 2 to 3 to 1 to 2 to 3...
+    if (percentCompleted >= 50) {
       var jsonlength = spinWheelsJson.length;
       if (wordListLevel < (jsonlength - 1)) {
         wordListLevel = wordListLevel + 1;
@@ -377,7 +359,7 @@ export default class workshop_spin_wheels_1 extends Component {
         wordListLevel = 0;
         console.log('wordlistlevel: ' + wordListLevel);
       }
-      
+
       this.selectWordList();
     }
   }
@@ -397,11 +379,11 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.wheelLetters2 = wheelLetters2;
     exports.wheelLetters3 = wheelLetters3;
 
-    console.log('Json level: ' + spinWheelsJson[wordListLevel].level_id);
-    console.log('Json word list: ' + spinWheelsJson[wordListLevel].word_list);
-    console.log('Json spinner1: ' + spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list);
-    console.log('Json spinner2: ' + spinWheelsJson[wordListLevel].spinners[1].spinner2.letter_list);
-    console.log('Json spinner3: ' + spinWheelsJson[wordListLevel].spinners[2].spinner3.letter_list);
+    //console.log('Json level: ' + spinWheelsJson[wordListLevel].level_id);
+    //console.log('Json word list: ' + spinWheelsJson[wordListLevel].word_list);
+    //console.log('Json spinner1: ' + spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list);
+    //console.log('Json spinner2: ' + spinWheelsJson[wordListLevel].spinners[1].spinner2.letter_list);
+    //console.log('Json spinner3: ' + spinWheelsJson[wordListLevel].spinners[2].spinner3.letter_list);
 
   }
 
