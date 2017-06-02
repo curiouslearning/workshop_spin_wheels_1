@@ -34,20 +34,6 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
-//const wordImages = {
-//  'can': require('./images/can.jpg'),
-//  'cat': require('./images/cat.jpg'),
-//  'hat': require('./images/hat.jpg'),
-//  'hen': require('./images/hen.jpg'),
-//}
-
-//const wordSounds = {
-//  'can': require('./audio/can.wav'),
-//  'cat': require('./audio/cat.wav'),
-//  'hat': require('./audio/hat.wav'),
-//  'hen': require('./audio/hen.wav'),
-//}
-
 var targetWordList
 
 //var targetWordList = ["cat", "can", "hat", "hen"];
@@ -66,8 +52,8 @@ var letter2;
 var letter3;
 
 var wordsCompleted;
-
-//var wordListLevel;
+var wordsShown;
+var wordListLevel;
 
 export default class workshop_spin_wheels_1 extends Component {
 
@@ -84,7 +70,7 @@ export default class workshop_spin_wheels_1 extends Component {
     }
 
     this.activeCells = [true, true, true];
-    this.animationKeys = ["IDLELETTER1", "IDLELETTER2", "IDLELETTER3"];
+    this.animationKeys = ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3'];
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
     this.scale = {image: 1};
@@ -92,19 +78,23 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numColumns = 3;
     this.numRows = 1;
 
-    wordsCompleted = 0;
+    wordListLevel = 0;
+    //wordsCompleted = 0;
+    //wordsShown = [];
+
+    this.selectWordList();
 
     //this.splitWords();
     //this.addConsonant();
 
-    targetWordList = spinWheelsJson[0].word_list;
-    wheelLetters1 = spinWheelsJson[0].spinners[0].spinner1.letter_list;
-    wheelLetters2 = spinWheelsJson[0].spinners[1].spinner2.letter_list;
-    wheelLetters3 = spinWheelsJson[0].spinners[2].spinner3.letter_list;
+    //targetWordList = spinWheelsJson[0].word_list;
+    //wheelLetters1 = spinWheelsJson[0].spinners[0].spinner1.letter_list;
+    //wheelLetters2 = spinWheelsJson[0].spinners[1].spinner2.letter_list;
+    //wheelLetters3 = spinWheelsJson[0].spinners[2].spinner3.letter_list;
 
-    exports.wheelLetters1 = wheelLetters1;
-    exports.wheelLetters2 = wheelLetters2;
-    exports.wheelLetters3 = wheelLetters3;
+    //exports.wheelLetters1 = wheelLetters1;
+    //exports.wheelLetters2 = wheelLetters2;
+    //exports.wheelLetters3 = wheelLetters3;
 
     //console.log('Json total items: ' + spinWheelsJson.length);
     //console.log('Json level: ' + spinWheelsJson[0].level_id);
@@ -160,9 +150,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({imageOpacity: 0});
     this.nextWord();
 
-    cells[0].animationKey = "SPINLETTER1";
-    cells[1].animationKey = "SPINLETTER2";
-    cells[2].animationKey = "SPINLETTER3";
+    cells[0].animationKey = 'SPINLETTER1';
+    cells[1].animationKey = 'SPINLETTER2';
+    cells[2].animationKey = 'SPINLETTER3';
 
     cells[0].loopAnimation = true;
     cells[0].uid = randomstring({length: 7});
@@ -184,9 +174,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({buttonDisabled: true});
 
     var intervalId = TimerMixin.setTimeout( () => {
-      cells[0].animationKey = "STOPLETTER1";
-      cells[1].animationKey = "STOPLETTER2";
-      cells[2].animationKey = "STOPLETTER3";
+      cells[0].animationKey = 'STOPLETTER1';
+      cells[1].animationKey = 'STOPLETTER2';
+      cells[2].animationKey = 'STOPLETTER3';
 
       cells[0].loopAnimation = true;
       cells[0].uid = randomstring({length: 7});
@@ -206,7 +196,7 @@ export default class workshop_spin_wheels_1 extends Component {
   onStopWheelsSetState() {
     var timeoutId = TimerMixin.setTimeout( () => {
       this.setState({imageOpacity: 1});
-      //this.setState({buttonImageOpacity: 1});
+      this.setState({buttonImageOpacity: 1});
       this.setState({buttonDisabled: false});
       this.setState({spinButtonDisabled: false});
       this.setState({spinButtonBackgroundColor: 'royalblue'});
@@ -222,7 +212,7 @@ export default class workshop_spin_wheels_1 extends Component {
   stopIndividualWheels (wheelNumber) {
     const cells = _.cloneDeep(this.state.cells);
 
-    cells[wheelNumber - 1].animationKey = "STOPLETTER" + wheelNumber;
+    cells[wheelNumber - 1].animationKey = 'STOPLETTER' + wheelNumber;
     cells[wheelNumber - 1].loopAnimation = true;
     cells[wheelNumber - 1].uid = randomstring({length: 7});
 
@@ -253,7 +243,7 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
-    var wheel = eval("wheelLetters" + wheelNumber);
+    var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
 
@@ -300,7 +290,7 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
-    var wheel = eval("wheelLetters" + wheelNumber);
+    var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
 
@@ -348,23 +338,71 @@ export default class workshop_spin_wheels_1 extends Component {
   checkWord(l1, l2, l3) {
     var newWord = l1 + l2 + l3;
     var newWordInList = (targetWordList.indexOf(newWord) > -1);
-    console.log("New Word: " + newWord);
-    console.log("Is word in List: " + newWordInList);
-
-    //var wordListLength = targetWordList.length;
-    //var percentCompleted = (wordsCompleted/wordListLength) * 100;
-    //console.log(percentCompleted);
+    console.log('New Word: ' + newWord);
+    console.log('Is word in List: ' + newWordInList);
 
     if (newWordInList == true) {
-      //wordsCompleted = wordsCompleted + 1;
+
+      if ((wordsShown.indexOf(newWord) > -1) == false) {
+        wordsShown.push(newWord);
+        wordsCompleted = wordsCompleted + 1;
+        this.checkPercentComplete();
+      }
+
       targetWord = newWord;
       //targetImage = targetWord + ".jpg";
-      targetSound = targetWord + ".wav";
+      targetSound = targetWord + '.wav';
       this.setState({imageOpacity: 1});
       //this.setState({buttonDisabled: false});
       this.onSpinButtonPress();
       //this.onStopWheelsSetState();
     }
+  }
+
+  // Function to check percent of words completed from selected target word list
+  checkPercentComplete() {
+    var wordListLength = targetWordList.length;
+    var percentCompleted = (wordsCompleted/wordListLength) * 100;
+    console.log('Words completed: ' + wordsCompleted);
+    console.log('Total words in list: ' + wordListLength);
+    console.log('Percent completed: ' + percentCompleted);
+    console.log('wordsShown[]: ' + wordsShown);
+
+    if (percentCompleted >= 20) {
+      var jsonlength = spinWheelsJson.length;
+      if (wordListLevel < (jsonlength - 1)) {
+        wordListLevel = wordListLevel + 1;
+        console.log('wordlistlevel: ' + wordListLevel);
+      } else {
+        wordListLevel = 0;
+        console.log('wordlistlevel: ' + wordListLevel);
+      }
+      
+      this.selectWordList();
+    }
+  }
+
+  // Function to select the target word list from JSON file
+  selectWordList () {
+
+    wordsCompleted = 0;
+    wordsShown = [];
+
+    targetWordList = spinWheelsJson[wordListLevel].word_list;
+    wheelLetters1 = spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list;
+    wheelLetters2 = spinWheelsJson[wordListLevel].spinners[1].spinner2.letter_list;
+    wheelLetters3 = spinWheelsJson[wordListLevel].spinners[2].spinner3.letter_list;
+
+    exports.wheelLetters1 = wheelLetters1;
+    exports.wheelLetters2 = wheelLetters2;
+    exports.wheelLetters3 = wheelLetters3;
+
+    console.log('Json level: ' + spinWheelsJson[wordListLevel].level_id);
+    console.log('Json word list: ' + spinWheelsJson[wordListLevel].word_list);
+    console.log('Json spinner1: ' + spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list);
+    console.log('Json spinner2: ' + spinWheelsJson[wordListLevel].spinners[1].spinner2.letter_list);
+    console.log('Json spinner3: ' + spinWheelsJson[wordListLevel].spinners[2].spinner3.letter_list);
+
   }
 
   // randomly select a word from the target word list
@@ -377,7 +415,7 @@ export default class workshop_spin_wheels_1 extends Component {
     letter3 = targetWordArray[2];
 
     //targetImage = targetWord + ".jpg";
-    targetSound = targetWord + ".wav";
+    targetSound = targetWord + '.wav';
 
     exports.letter1 = letter1;
     exports.letter2 = letter2;
@@ -398,8 +436,8 @@ export default class workshop_spin_wheels_1 extends Component {
       var tempWordArray = [];
       tempWordArray = targetWordList[i].split("");
       for(j=0; j<tempWordArray.length; j++) {
-        eval("wheelLettersH"+(j+1)).push(tempWordArray[j]);
-        eval("wheelLettersH"+(j+1)).sort();
+        eval('wheelLettersH'+(j+1)).push(tempWordArray[j]);
+        eval('wheelLettersH'+(j+1)).sort();
       }
     }
 
