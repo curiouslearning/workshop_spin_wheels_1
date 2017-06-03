@@ -24,15 +24,16 @@ import AnimatedSprite from 'react-native-animated-sprite';
 import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import Sound from 'react-native-sound';
 import letterSprite from './sprites/letterSprite/letterSprite';
-import spinWheelsJson from './spin_wheels';
-import wordImages from './wordimages';
-import wordSounds from './wordsounds';
+//import spinWheelsJson from './json/spin_wheels';
+import wordListUtil from './json/wordListUtil';
+import wordImages from './js/wordimages';
+import wordSounds from './js/wordsounds';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
-var targetWordList
+var targetWordList;
 
 //var targetWordList = ["cat", "can", "hat", "hen"];
 //var wordList = ["cat", "hen"];
@@ -77,8 +78,10 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numRows = 1;
 
     wordListLevel = 0;
-    this.selectWordList();
-
+    wordsCompleted = 0;
+    wordsShown = [];
+    targetWordList = wordListUtil.selectWordList(wordListLevel);
+    //this.selectWordList();
     //this.splitWords();
     //this.addConsonant();
 
@@ -197,11 +200,17 @@ export default class workshop_spin_wheels_1 extends Component {
 
     this.setState({cells});
     this.setState({imageOpacity: 0});
+
+    console.log('stopIndWheels (letter1): ' + letter1);
+    console.log('stopIndWheels (letter2): ' + letter2);
+    console.log('stopIndWheels (letter3): ' + letter3);
+    console.log('wordListLevel: ' + wordListLevel);
     this.checkWord(letter1, letter2, letter3);
 
   }
 
   // test function only
+  /*
   getCurrentIndex (wheelNumber) {
     if (wheelNumber == 1) {
       letter1 = "";
@@ -216,12 +225,17 @@ export default class workshop_spin_wheels_1 extends Component {
       exports.letter3 = letter3;
       this.stopIndividualWheels(wheelNumber);
     }
-
   }
+  */
 
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
+    var wl = require('./json/wordListUtil.js');
+    var wheelLetters1 = wl.wheelLetters1;
+    var wheelLetters2 = wl.wheelLetters2;
+    var wheelLetters3 = wl.wheelLetters3;
+
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
@@ -269,6 +283,11 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
+    var wl = require('./json/wordListUtil.js');
+    var wheelLetters1 = wl.wheelLetters1;
+    var wheelLetters2 = wl.wheelLetters2;
+    var wheelLetters3 = wl.wheelLetters3;
+
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
     var currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
@@ -342,6 +361,7 @@ export default class workshop_spin_wheels_1 extends Component {
   checkPercentComplete() {
     var wordListLength = targetWordList.length;
     var percentCompleted = (wordsCompleted/wordListLength) * 100;
+
     console.log('Words completed: ' + wordsCompleted);
     console.log('Total words in list: ' + wordListLength);
     console.log('Percent completed: ' + percentCompleted);
@@ -351,8 +371,8 @@ export default class workshop_spin_wheels_1 extends Component {
     // If yes, word list is changed to the next level
     // Currently, the lists are being rotated i.e. 1 to 2 to 3 to 1 to 2 to 3...
     if (percentCompleted >= 50) {
-      var jsonlength = spinWheelsJson.length;
-      if (wordListLevel < (jsonlength - 1)) {
+      var jsonLength = wordListUtil.getJsonLength();
+      if (wordListLevel < (jsonLength - 1)) {
         wordListLevel = wordListLevel + 1;
         console.log('wordlistlevel: ' + wordListLevel);
       } else {
@@ -360,15 +380,19 @@ export default class workshop_spin_wheels_1 extends Component {
         console.log('wordlistlevel: ' + wordListLevel);
       }
 
-      this.selectWordList();
+      wordsCompleted = 0;
+      wordsShown = [];
+      //this.selectWordList();
+      targetWordList = wordListUtil.selectWordList(wordListLevel);
     }
   }
 
   // Function to select the target word list from JSON file
+  /*
   selectWordList () {
 
-    wordsCompleted = 0;
-    wordsShown = [];
+    //wordsCompleted = 0;
+    //wordsShown = [];
 
     targetWordList = spinWheelsJson[wordListLevel].word_list;
     wheelLetters1 = spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list;
@@ -386,6 +410,7 @@ export default class workshop_spin_wheels_1 extends Component {
     //console.log('Json spinner3: ' + spinWheelsJson[wordListLevel].spinners[2].spinner3.letter_list);
 
   }
+*/
 
   // randomly select a word from the target word list
   nextWord() {
