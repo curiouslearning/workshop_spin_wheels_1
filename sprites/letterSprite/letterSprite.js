@@ -63,26 +63,19 @@ const letterSprite = {
       case 'IDLELETTER3':
         return [25];
       case 'SPINLETTER1':
-        //return [2,7,16];
         //return getWheelLetters(1);
         return consonants.sort(function(a,b){return 0.5 - Math.random()});
       case 'SPINLETTER2':
-        //return [0,4];
-        return vowels;
         //return getWheelLetters(2);
-        ///return wheel2;
+        return vowels;
       case 'SPINLETTER3':
-        //return [2,13,19,20,25];
         //return getWheelLetters(3);
         return consonants.sort(function(a,b){return 0.5 - Math.random()});
       case 'STOPLETTER1':
-        //return [c1];
         return [alphabetList.indexOf(letter1)];
       case 'STOPLETTER2':
-        //return [v];
         return [alphabetList.indexOf(letter2)];
       case 'STOPLETTER3':
-        //return [c2];
         return [alphabetList.indexOf(letter3)];
     }
   },

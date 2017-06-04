@@ -1,8 +1,25 @@
 const wordSounds = {
   can: require('../audio/can.wav'),
+  cap: require('../audio/cap.wav'),
   cat: require('../audio/cat.wav'),
-  hat: require('../audio/hat.wav'),
-  hen: require('../audio/hen.wav'),
+  fin: require('../audio/fin.wav'),
+  lip: require('../audio/lip.wav'),
+  map: require('../audio/map.wav'),
+  mat: require('../audio/mat.wav'),
+  nap: require('../audio/nap.wav'),
+  nip: require('../audio/nip.wav'),
+  pam: require('../audio/pam.wav'),
+  pan: require('../audio/pan.wav'),
+  pat: require('../audio/pat.wav'),
+  pin: require('../audio/pin.wav'),
+  pit: require('../audio/pit.wav'),
+  sip: require('../audio/sip.wav'),
+  tan: require('../audio/tan.wav'),
+  tap: require('../audio/tap.wav'),
+  zip: require('../audio/zip.wav'),
+  try_again: require('../audio/try_again.wav'),
+  bubble_machine: require('../audio/bubble_machine.mp3'),
+  machine_reverse: require('../audio/machine_reverse.mp3'),
 }
 
 export default wordSounds;

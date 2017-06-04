@@ -61,11 +61,15 @@ export default class workshop_spin_wheels_1 extends Component {
     this.state = {
       cells: [],
       imageOpacity: 0,
-      buttonImageOpacity: 0.4,
+      //buttonImageOpacity: 0.4,
+      buttonImageC1Opacity: 0.4,
+      buttonImageC2Opacity: 0.4,
+      buttonImageC3Opacity: 0.4,
       buttonDisabled: true,
       spinButtonDisabled: false,
       spinButtonBackgroundColor: 'royalblue',
       spinButtonTextOpacity: 1,
+      animatedMatrixPointerEvents: 'none',
     }
 
     this.activeCells = [true, true, true];
@@ -76,6 +80,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.cellSpriteScale = 1;
     this.numColumns = 3;
     this.numRows = 1;
+    this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
 
     wordListLevel = 0;
     wordsCompleted = 0;
@@ -119,6 +124,21 @@ export default class workshop_spin_wheels_1 extends Component {
     return {width, height};
   }
 
+  showArrowButtons() {
+    var timeoutId = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC1Opacity: 0.7});
+    }, 1000);
+
+    var timeoutId2 = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC2Opacity: 0.7});
+    }, 1500);
+
+    var timeoutId3 = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC3Opacity: 0.7});
+    }, 2000);
+
+  }
+
   // Function called by Spin Button to spin the wheels
   // A word from the target word list will be selected
   // via the nextWord() function
@@ -126,10 +146,14 @@ export default class workshop_spin_wheels_1 extends Component {
     const cells = _.cloneDeep(this.state.cells);
 
     this.setState({spinButtonDisabled: true});
-    this.setState({buttonImageOpacity: 0.6});
+    //this.setState({buttonImageOpacity: 0.6});
+    this.setState({buttonImageC1Opacity: 0.3});
+    this.setState({buttonImageC2Opacity: 0.3});
+    this.setState({buttonImageC3Opacity: 0.3});
     this.setState({spinButtonTextOpacity: 0.5});
     this.setState({spinButtonBackgroundColor: 'gray'});
     this.setState({imageOpacity: 0});
+    this.setState({animatedMatrixPointerEvents: 'none'});
     this.nextWord();
 
     cells[0].animationKey = 'SPINLETTER1';
@@ -145,6 +169,8 @@ export default class workshop_spin_wheels_1 extends Component {
 
     this.setState({cells});
     this.stopWheels();
+    //this.playSpinningSound();
+    this.wheelsSound.play();
 
   }
 
@@ -155,7 +181,7 @@ export default class workshop_spin_wheels_1 extends Component {
     const cells = _.cloneDeep(this.state.cells);
     this.setState({buttonDisabled: true});
 
-    var intervalId = TimerMixin.setTimeout( () => {
+    var timeoutId = TimerMixin.setTimeout( () => {
       cells[0].animationKey = 'STOPLETTER1';
       cells[1].animationKey = 'STOPLETTER2';
       cells[2].animationKey = 'STOPLETTER3';
@@ -167,6 +193,8 @@ export default class workshop_spin_wheels_1 extends Component {
       cells[2].loopAnimation = true;
       cells[2].uid = randomstring({length: 7});
 
+      this.wheelsSound.stop( () => this.wheelsSound.release() );
+      this.showArrowButtons();
       this.setState({cells});
       this.checkWord(letter1, letter2, letter3);
       this.onStopWheelsSetState();
@@ -178,13 +206,28 @@ export default class workshop_spin_wheels_1 extends Component {
   onStopWheelsSetState() {
     var timeoutId = TimerMixin.setTimeout( () => {
       this.setState({imageOpacity: 1});
+      //this.setState({buttonImageOpacity: 1});
+      //this.setState({buttonDisabled: false});
+      //this.setState({spinButtonDisabled: false});
+      //this.setState({spinButtonBackgroundColor: 'royalblue'});
+      //this.setState({spinButtonTextOpacity: 1});
+      //this.onSpinButtonPress();
+    }, 100);
+
+    var timeoutId2 = TimerMixin.setTimeout( () => {
+      //this.setState({imageOpacity: 1});
       this.setState({buttonImageOpacity: 1});
       this.setState({buttonDisabled: false});
       this.setState({spinButtonDisabled: false});
       this.setState({spinButtonBackgroundColor: 'royalblue'});
       this.setState({spinButtonTextOpacity: 1});
+      this.setState({animatedMatrixPointerEvents: 'auto'});
+      this.setState({buttonImageC1Opacity: 1});
+      this.setState({buttonImageC2Opacity: 1});
+      this.setState({buttonImageC3Opacity: 1});
       //this.onSpinButtonPress();
-    }, 100);
+    }, 2500);
+
   }
 
   // Function to stop the wheels individually. This function
@@ -355,6 +398,7 @@ export default class workshop_spin_wheels_1 extends Component {
       this.onSpinButtonPress();
       //this.onStopWheelsSetState();
     }
+
   }
 
   // Function to check percent of words completed from selected target word list
@@ -473,6 +517,8 @@ export default class workshop_spin_wheels_1 extends Component {
   onSpinButtonPress () {
     // Load the sound file variable, targetSound
     var whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
+      console.log('targetSound: ' + targetSound);
+
       if (error) {
         console.log('Failed to load the sound', error);
         return;
@@ -539,7 +585,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickUp(1)}
                 >
                 <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC1Opacity}]}
                   source={require('./images/yellow_border_up.png')}
                 />
 
@@ -550,7 +596,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickUp(2)}
                 >
                 <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC2Opacity}]}
                   source={require('./images/yellow_border_up.png')}
                 />
 
@@ -561,14 +607,15 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickUp(3)}
                 >
                 <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC3Opacity}]}
                   source={require('./images/yellow_border_up.png')}
                 />
               </TouchableOpacity>
 
             </View>
 
-            <View style={styles.wheelsRow}>
+            <View style={styles.wheelsRow}
+              pointerEvents={this.state.animatedMatrixPointerEvents}>
 
               <AnimatedSpriteMatrix
                 styles={{
@@ -581,6 +628,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 cellObjs={this.state.cells}
                 scale={this.scale}
                 ////onPress={(cellObj, position) => this.cellPressed(cellObj, position)}
+                onPress={() => this.onSpinButtonPress()}
               />
 
             </View>
@@ -592,7 +640,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickDown(1)}
                 >
                 <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC1Opacity}]}
                   source={require('./images/yellow_border_down.png')}
                 />
               </TouchableOpacity>
@@ -602,7 +650,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickDown(2)}
                 >
                 <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC2Opacity}]}
                   source={require('./images/yellow_border_down.png')}
                 />
               </TouchableOpacity>
@@ -612,7 +660,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 onPress={() => this.onArrowClickDown(3)}
                 >
                 <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageOpacity}]}
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC3Opacity}]}
                   source={require('./images/yellow_border_down.png')}
                 />
               </TouchableOpacity>

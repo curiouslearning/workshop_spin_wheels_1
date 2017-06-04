@@ -1,5 +1,9 @@
 import spinWheelsJson from './spin_wheels';
 
+// This file contains functions related to JSON file containing lists of words
+// to be used in the app
+
+// Function to select target word list from JSON file
 function selectWordList(wordListLevel) {
   var targetWordList = spinWheelsJson[wordListLevel].word_list;
   var wheelLetters1 = spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list;
@@ -13,6 +17,7 @@ function selectWordList(wordListLevel) {
   return targetWordList;
 }
 
+// Function to get number of word lists in JSON file
 function getJsonLength() {
     return spinWheelsJson.length;
 }
