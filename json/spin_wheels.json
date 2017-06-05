@@ -1,7 +1,7 @@
 [
 	{
 		"level_id" : "001",
-		"word_list" : ["cat","cam","can","cap","cat","map","man","mat","nap","pam","pan","pat","tan","tap"],
+		"word_list" : ["cat","cam","can","cap","map","man","mat","nap","pan","pat","tan","tap"],
 		"spinners" : [
 			{
 				"spinner1" : {
@@ -20,7 +20,7 @@
 		]
 	},{
 		"level_id" : "002",
-		"word_list" : ["fin","lip","liz","sin","sip","sit","sis","zip","zit","nip","nil","pit","pin","pip"],
+		"word_list" : ["fin","lip","sin","sip","sit","zip","zit","nip","nil","pit","pin","pip"],
 		"spinners" : [
 			{
 				"spinner1" : {
@@ -39,10 +39,10 @@
 		]
 	},{
 		"level_id" : "003",
-		"word_list" : ["cat","cam","can","cap","cat","map","man","mat","nap","nip",
-										"nil","pam","pal","pan","pat","tan","tap","fan","fat","fin",
-										"fit","lap","lat","lip","lit","liz","sam","sap","sat","sal",
-										"sim","sin","sip","sit","sis","zap","zip","zit","pit","pin","pip"
+		"word_list" : ["cat","cam","can","cap","map","man","mat","nap","nip",
+										"nil","pal","pan","pat","tan","tap","fan","fat","fin",
+										"fit","lap","lip","lit","sap","sat",
+										"sim","sin","sip","sit","zap","zip","zit","pit","pin","pip"
 									],
 		"spinners" : [
 			{
