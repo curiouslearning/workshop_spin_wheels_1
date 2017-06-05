@@ -78,6 +78,7 @@ export default class workshop_spin_wheels_1 extends Component {
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     targetWordList = wordListUtil.selectWordList(wordListLevel);
 
+
   }
 
   componentWillMount () {
@@ -306,13 +307,15 @@ export default class workshop_spin_wheels_1 extends Component {
   stopIndividualWheels (wheelNumber) {
     const cells = _.cloneDeep(this.state.cells);
 
+    // Stop the individual wheel
     cells[wheelNumber - 1].animationKey = 'STOPLETTER' + wheelNumber;
     cells[wheelNumber - 1].loopAnimation = true;
     cells[wheelNumber - 1].uid = randomstring({length: 7});
 
     this.setState({cells});
-    //this.setState({imageOpacity: 0});
     this.setState({imageOpacity: 1});
+
+    // Check if word formed is in current target word list
     this.checkWord(letter1, letter2, letter3);
 
     console.log('stopIndWheels (letter1): ' + letter1);
@@ -425,6 +428,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Function to show (but still slightly gray out) the Up/Down arrows column by column
   showArrowButtons() {
+
     var timeoutId = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC1Opacity: 0.7});
     }, 1000);
