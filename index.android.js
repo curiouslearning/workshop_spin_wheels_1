@@ -54,6 +54,7 @@ export default class workshop_spin_wheels_1 extends Component {
       spinButtonBackgroundColor: 'royalblue',
       spinButtonTextOpacity: 1,
       animatedMatrixPointerEvents: 'none',        // wheels are touch-disabled
+      percentCompleteGoal: 50,                    // Percent complete before advancing to next word list
     }
 
     this.activeCells = [true, true, true];
@@ -260,7 +261,7 @@ export default class workshop_spin_wheels_1 extends Component {
     // Checks if 50% of word list has been formed
     // If yes, word list is changed to the next level
     // Currently, the lists are being rotated i.e. 1 to 2 to 3 to 1 to 2 to 3...
-    if (percentCompleted >= 50) {
+    if (percentCompleted >= this.state.percentCompleteGoal) {
       // Get number of word list available in JSON file
       var jsonLength = wordListUtil.getJsonLength();
       if (wordListLevel < (jsonLength - 1)) {
@@ -308,7 +309,6 @@ export default class workshop_spin_wheels_1 extends Component {
       this.setState({buttonImageC1Opacity: 1});                 // Show the arrow buttons fully
       this.setState({buttonImageC2Opacity: 1});
       this.setState({buttonImageC3Opacity: 1});
-      //this.onSpinButtonPress();
     }, 2500);
 
   }
@@ -453,6 +453,20 @@ export default class workshop_spin_wheels_1 extends Component {
     var timeoutId3 = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC3Opacity: 0.7});
     }, 2000);
+
+    /*
+    var timeoutId4 = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC1Opacity: 1});
+    }, 2500);
+
+    var timeoutId5 = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC2Opacity: 1});
+    }, 3000);
+
+    var timeoutId6 = TimerMixin.setTimeout ( () => {
+      this.setState({buttonImageC3Opacity: 1});
+    }, 3500);
+    */
   }
 
   // Function to play an audio of the word formed by the wheels
