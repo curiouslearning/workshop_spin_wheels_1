@@ -24,7 +24,6 @@ import AnimatedSprite from 'react-native-animated-sprite';
 import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import Sound from 'react-native-sound';
 import letterSprite from './sprites/letterSprite/letterSprite';
-//import spinWheelsJson from './json/spin_wheels';
 import wordListUtil from './json/wordListUtil';
 import wordImages from './js/wordimages';
 import wordSounds from './js/wordsounds';
@@ -34,21 +33,7 @@ const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
 var targetWordList;
-
-//var targetWordList = ["cat", "can", "hat", "hen"];
-//var wordList = ["cat", "hen"];
-
-var wheelLetters1 = [];
-var wheelLetters2 = [];
-var wheelLetters3 = [];
-
-var targetImage;
 var targetWord;
-var targetSound;
-
-var letter1;
-var letter2;
-var letter3;
 
 var wordsCompleted;
 var wordsShown;
@@ -60,16 +45,15 @@ export default class workshop_spin_wheels_1 extends Component {
     super(props)
     this.state = {
       cells: [],
-      imageOpacity: 0,
-      //buttonImageOpacity: 0.4,
-      buttonImageC1Opacity: 0.4,
-      buttonImageC2Opacity: 0.4,
-      buttonImageC3Opacity: 0.4,
-      buttonDisabled: true,
-      spinButtonDisabled: false,
+      imageOpacity: 0,                            // clear image of word
+      buttonImageC1Opacity: 0.3,                  // arrow buttons are grayed out
+      buttonImageC2Opacity: 0.3,
+      buttonImageC3Opacity: 0.3,
+      buttonDisabled: true,                       // arrow and image buttons are touch-disabled
+      spinButtonDisabled: false,                  // spin button is active
       spinButtonBackgroundColor: 'royalblue',
       spinButtonTextOpacity: 1,
-      animatedMatrixPointerEvents: 'none',
+      animatedMatrixPointerEvents: 'none',        // wheels are touch-disabled
     }
 
     this.activeCells = [true, true, true];
@@ -82,13 +66,17 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
 
-    wordListLevel = 0;
-    wordsCompleted = 0;
-    wordsShown = [];
+    var letter1;            // first letter of target word
+    var letter2;            // second letter of target word
+    var letter3;            // third letter of target word
+    var targetSound;        // the sound file of the target word
+
+    wordListLevel = 0;      // word list level from JSON; start with level 0
+    wordsCompleted = 0;     // for tracking number of words formed from word list
+    wordsShown = [];        //
+
+    // get word list from JSON file via the selectWordList function in wordListUtil.js
     targetWordList = wordListUtil.selectWordList(wordListLevel);
-    //this.selectWordList();
-    //this.splitWords();
-    //this.addConsonant();
 
   }
 
@@ -130,17 +118,16 @@ export default class workshop_spin_wheels_1 extends Component {
   cellPressed (cellObj, position) {
     const cells = _.cloneDeep(this.state.cells);
 
-    this.setState({spinButtonDisabled: true});
-    //this.setState({buttonImageOpacity: 0.6});
-    this.setState({buttonImageC1Opacity: 0.3});
-    this.setState({buttonImageC2Opacity: 0.3});
-    this.setState({buttonImageC3Opacity: 0.3});
-    this.setState({spinButtonTextOpacity: 0.5});
-    this.setState({spinButtonBackgroundColor: 'gray'});
-    this.setState({imageOpacity: 0});
-    this.setState({animatedMatrixPointerEvents: 'none'});
+    // Set states for images and buttons after the spin button is pressed
+    this.onSpinButtonPressSetState();
+
+    // Get the next word to display in wheels via the nextWord function
     this.nextWord();
 
+    // Play the wheels spinning sound
+    this.wheelsSound.play();
+
+    // Start spinning the wheels
     cells[0].animationKey = 'SPINLETTER1';
     cells[1].animationKey = 'SPINLETTER2';
     cells[2].animationKey = 'SPINLETTER3';
@@ -153,61 +140,101 @@ export default class workshop_spin_wheels_1 extends Component {
     cells[2].uid = randomstring({length: 7});
 
     this.setState({cells});
+
+    // Call stopWheels function to stop all 3 wheels together
     this.stopWheels();
-    this.wheelsSound.play();
 
   }
 
-  // randomly select a word from the target word list
+  // Randomly select a word from the target word list
   nextWord() {
     targetWord = targetWordList[Math.floor(Math.random() * targetWordList.length)];
-    var targetWordArray = targetWord.split("");
 
+    // Split the target word into individual letters
+    var targetWordArray = targetWord.split("");
     letter1 = targetWordArray[0];
     letter2 = targetWordArray[1];
     letter3 = targetWordArray[2];
 
-    //targetImage = targetWord + ".jpg";
+    // Filename of sound file of target word
     targetSound = targetWord + '.wav';
 
+    // Export individual letters; to be used in letterSprite.js
     exports.letter1 = letter1;
     exports.letter2 = letter2;
     exports.letter3 = letter3;
+  }
+
+  // This function is called to stop the wheels from spinning
+  // The word created by the wheels will be checked against the
+  // target word list via the checkWord function
+  stopWheels() {
+    const cells = _.cloneDeep(this.state.cells);
+    this.setState({buttonDisabled: true});          //disable all arrow and image buttons
+
+    // Stop the wheels from spinning
+    var timeoutId = TimerMixin.setTimeout( () => {
+      cells[0].animationKey = 'STOPLETTER1';
+      cells[1].animationKey = 'STOPLETTER2';
+      cells[2].animationKey = 'STOPLETTER3';
+
+      cells[0].loopAnimation = true;
+      cells[0].uid = randomstring({length: 7});
+      cells[1].loopAnimation = true;
+      cells[1].uid = randomstring({length: 7});
+      cells[2].loopAnimation = true;
+      cells[2].uid = randomstring({length: 7});
+
+      this.setState({cells});
+
+      // Stop the wheel spinning sound
+      this.wheelsSound.stop( () => this.wheelsSound.release() );
+      // Start showing the arrow buttons column by column
+      this.showArrowButtons();
+      // Call checkWord function to check the word formed by the wheels
+      this.checkWord(letter1, letter2, letter3);
+      // Set state of the buttons and images
+      this.onStopWheelsSetState();
+    }, 2500);
+
   }
 
   // Function to check if the word created by the wheels are in the
   // target word list. If yes, the image will show and the audio will play
   checkWord(l1, l2, l3) {
     var newWord = l1 + l2 + l3;
+
+    // Check if word formed by wheels is in target word list
     var newWordInList = (targetWordList.indexOf(newWord) > -1);
     console.log('New Word: ' + newWord);
     console.log('Is word in List: ' + newWordInList);
 
     if (newWordInList == true) {
-
+      // Check if the word was not shown before
       if ((wordsShown.indexOf(newWord) > -1) == false) {
         wordsShown.push(newWord);
         wordsCompleted = wordsCompleted + 1;
+        // Check percent of word list shown; if >= 50% shown, advance to next level
         this.checkPercentComplete();
       }
 
       targetWord = newWord;
-      //targetImage = targetWord + ".jpg";
-      targetSound = targetWord + '.wav';
-      this.setState({imageOpacity: 1});
-      //this.setState({buttonDisabled: false});
+      targetSound = newWord + '.wav';
+
+      // Play the audio file of the word
       this.onSpinButtonPress();
-      //this.onStopWheelsSetState();
 
     } else {
-      targetSound = 'machine_reverse.mp3';
+      // If word not in word list, shows an 'unknown' image
       targetWord = 'unknown';
-      //this.setState({imageOpacity: 1});
+      // Play the following file when user touched the wheels and 'unknown' image
+      targetSound = 'machine_reverse.mp3';
     }
 
   }
 
   // Function to check percent of words completed from selected target word list
+  // If >= 50% of word list formed, advance to next level of word list
   checkPercentComplete() {
     var wordListLength = targetWordList.length;
     var percentCompleted = (wordsCompleted/wordListLength) * 100;
@@ -221,6 +248,7 @@ export default class workshop_spin_wheels_1 extends Component {
     // If yes, word list is changed to the next level
     // Currently, the lists are being rotated i.e. 1 to 2 to 3 to 1 to 2 to 3...
     if (percentCompleted >= 50) {
+      // Get number of word list available in JSON file
       var jsonLength = wordListUtil.getJsonLength();
       if (wordListLevel < (jsonLength - 1)) {
         wordListLevel = wordListLevel + 1;
@@ -230,56 +258,40 @@ export default class workshop_spin_wheels_1 extends Component {
         console.log('wordlistlevel: ' + wordListLevel);
       }
 
+      // Reset wordsCompleted and wordShown; get new target word list
       wordsCompleted = 0;
       wordsShown = [];
-      //this.selectWordList();
       targetWordList = wordListUtil.selectWordList(wordListLevel);
     }
   }
 
-  // This function is called to stop the wheels from spinning
-  // The word created by the wheels will be checked against the
-  // target word list via the checkWord function
-  stopWheels() {
-    const cells = _.cloneDeep(this.state.cells);
-    this.setState({buttonDisabled: true});
-
-    var timeoutId = TimerMixin.setTimeout( () => {
-      cells[0].animationKey = 'STOPLETTER1';
-      cells[1].animationKey = 'STOPLETTER2';
-      cells[2].animationKey = 'STOPLETTER3';
-
-      cells[0].loopAnimation = true;
-      cells[0].uid = randomstring({length: 7});
-      cells[1].loopAnimation = true;
-      cells[1].uid = randomstring({length: 7});
-      cells[2].loopAnimation = true;
-      cells[2].uid = randomstring({length: 7});
-
-      this.wheelsSound.stop( () => this.wheelsSound.release() );
-      this.showArrowButtons();
-      this.setState({cells});
-      this.checkWord(letter1, letter2, letter3);
-      this.onStopWheelsSetState();
-    }, 2500);
-
+  // Set the state of buttons and images when the spin button is pressed
+  onSpinButtonPressSetState() {
+    this.setState({spinButtonDisabled: true});            // Disable spin button
+    this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
+    this.setState({buttonImageC2Opacity: 0.3});
+    this.setState({buttonImageC3Opacity: 0.3});
+    this.setState({spinButtonTextOpacity: 0.5});          // Gray out the text on spin button
+    this.setState({spinButtonBackgroundColor: 'gray'});   // Gray out the background of spin button
+    this.setState({imageOpacity: 0});                     // Remove image of word
+    this.setState({animatedMatrixPointerEvents: 'none'}); // Disable the wheels from touch
   }
 
   // Set the state of buttons and images when the wheels stop spinning
   onStopWheelsSetState() {
+    // Show the image of the word first
     var timeoutId = TimerMixin.setTimeout( () => {
       this.setState({imageOpacity: 1});
     }, 100);
 
+    // Set the following states after 2.5 seconds to allow audio file to play completely
     var timeoutId2 = TimerMixin.setTimeout( () => {
-      //this.setState({imageOpacity: 1});
-      this.setState({buttonImageOpacity: 1});
-      this.setState({buttonDisabled: false});
-      this.setState({spinButtonDisabled: false});
+      this.setState({buttonDisabled: false});                   // Enable the arrow buttons
+      this.setState({spinButtonDisabled: false});               // Enable the spin button
       this.setState({spinButtonBackgroundColor: 'royalblue'});
       this.setState({spinButtonTextOpacity: 1});
-      this.setState({animatedMatrixPointerEvents: 'auto'});
-      this.setState({buttonImageC1Opacity: 1});
+      this.setState({animatedMatrixPointerEvents: 'auto'});     // Enable the wheels (touch-enabled)
+      this.setState({buttonImageC1Opacity: 1});                 // Show the arrow buttons fully
       this.setState({buttonImageC2Opacity: 1});
       this.setState({buttonImageC3Opacity: 1});
       //this.onSpinButtonPress();
@@ -301,22 +313,21 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({cells});
     //this.setState({imageOpacity: 0});
     this.setState({imageOpacity: 1});
+    this.checkWord(letter1, letter2, letter3);
 
     console.log('stopIndWheels (letter1): ' + letter1);
     console.log('stopIndWheels (letter2): ' + letter2);
     console.log('stopIndWheels (letter3): ' + letter3);
     console.log('wordListLevel: ' + wordListLevel);
-    this.checkWord(letter1, letter2, letter3);
 
   }
 
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
-    var wl = require('./json/wordListUtil.js');
-    var wheelLetters1 = wl.wheelLetters1;
-    var wheelLetters2 = wl.wheelLetters2;
-    var wheelLetters3 = wl.wheelLetters3;
+    var wheelLetters1 = wordListUtil.wheelLetters1;
+    var wheelLetters2 = wordListUtil.wheelLetters2;
+    var wheelLetters3 = wordListUtil.wheelLetters3;
 
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
@@ -365,10 +376,9 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
-    var wl = require('./json/wordListUtil.js');
-    var wheelLetters1 = wl.wheelLetters1;
-    var wheelLetters2 = wl.wheelLetters2;
-    var wheelLetters3 = wl.wheelLetters3;
+    var wheelLetters1 = wordListUtil.wheelLetters1;
+    var wheelLetters2 = wordListUtil.wheelLetters2;
+    var wheelLetters3 = wordListUtil.wheelLetters3;
 
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
@@ -413,7 +423,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
-  // Function to show the Up/Down arrows column by column
+  // Function to show (but still slightly gray out) the Up/Down arrows column by column
   showArrowButtons() {
     var timeoutId = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC1Opacity: 0.7});
@@ -492,7 +502,7 @@ export default class workshop_spin_wheels_1 extends Component {
   // to wheel 2, and the third letter to wheel 3. This function was used in the
   // beginning when JSON was not used.
   // Currently not used
-  splitWords() {
+/*  splitWords() {
     var wheelLettersH1 = [];
     var wheelLettersH2 = [];
     var wheelLettersH3 = [];
@@ -511,11 +521,12 @@ export default class workshop_spin_wheels_1 extends Component {
     wheelLetters3 = [...new Set(wheelLettersH3)];
 
   }
+*/
 
   // Function to add additional consonants to wheel1 and wheel2
   // This function was used in the beginning when JSON was not used.
   // Currently unused
-  addConsonant() {
+/*  addConsonant() {
     wheelLetters1.push("q");
     wheelLetters3.push("c","u","z");
     wheelLetters1.sort();
@@ -524,8 +535,8 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.wheelLetters1 = wheelLetters1;
     exports.wheelLetters2 = wheelLetters2;
     exports.wheelLetters3 = wheelLetters3;
-
   }
+*/
 
   render() {
     return (
