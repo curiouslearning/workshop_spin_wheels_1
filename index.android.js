@@ -45,7 +45,7 @@ export default class workshop_spin_wheels_1 extends Component {
     super(props)
     this.state = {
       cells: [],
-      imageOpacity: 0,                            // clear image of word
+      imageOpacity: 0.3,                            // clear image of word
       buttonImageC1Opacity: 0.3,                  // arrow buttons are grayed out
       buttonImageC2Opacity: 0.3,
       buttonImageC3Opacity: 0.3,
@@ -65,19 +65,20 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numColumns = 3;
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
+    this.cannotSpinSound = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
 
     var letter1;            // first letter of target word
     var letter2;            // second letter of target word
     var letter3;            // third letter of target word
     var targetSound;        // the sound file of the target word
 
+    targetWord = 'unknown';
     wordListLevel = 0;      // word list level from JSON; start with level 0
     wordsCompleted = 0;     // for tracking number of words formed from word list
-    wordsShown = [];        //
+    wordsShown = [];        // for tracking what words were formed by wheels
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     targetWordList = wordListUtil.selectWordList(wordListLevel);
-
 
   }
 
@@ -117,33 +118,43 @@ export default class workshop_spin_wheels_1 extends Component {
   // A word from the target word list will be selected
   // via the nextWord() function
   cellPressed (cellObj, position) {
-    const cells = _.cloneDeep(this.state.cells);
+    // Check if spinButtonBackgroundColor is gray (when wheels are spinning)
+    // If yes, play the 'cannotSpinSound' sound
+    // If no, proceed with spinning the wheels
+    if (this.state.spinButtonBackgroundColor == 'gray') {
+      //this.cannotSpinSound.play( () => this.wheelsSound.release() );
+      this.cannotSpinSound.play();
+    } else {
 
-    // Set states for images and buttons after the spin button is pressed
-    this.onSpinButtonPressSetState();
+      const cells = _.cloneDeep(this.state.cells);
 
-    // Get the next word to display in wheels via the nextWord function
-    this.nextWord();
+      // Set states for images and buttons after the spin button is pressed
+      this.onSpinButtonPressSetState();
 
-    // Play the wheels spinning sound
-    this.wheelsSound.play();
+      // Get the next word to display in wheels via the nextWord function
+      this.nextWord();
 
-    // Start spinning the wheels
-    cells[0].animationKey = 'SPINLETTER1';
-    cells[1].animationKey = 'SPINLETTER2';
-    cells[2].animationKey = 'SPINLETTER3';
+      // Play the wheels spinning sound
+      this.wheelsSound.play();
 
-    cells[0].loopAnimation = true;
-    cells[0].uid = randomstring({length: 7});
-    cells[1].loopAnimation = true;
-    cells[1].uid = randomstring({length: 7});
-    cells[2].loopAnimation = true;
-    cells[2].uid = randomstring({length: 7});
+      // Start spinning the wheels
+      cells[0].animationKey = 'SPINLETTER1';
+      cells[1].animationKey = 'SPINLETTER2';
+      cells[2].animationKey = 'SPINLETTER3';
 
-    this.setState({cells});
+      cells[0].loopAnimation = true;
+      cells[0].uid = randomstring({length: 7});
+      cells[1].loopAnimation = true;
+      cells[1].uid = randomstring({length: 7});
+      cells[2].loopAnimation = true;
+      cells[2].uid = randomstring({length: 7});
 
-    // Call stopWheels function to stop all 3 wheels together
-    this.stopWheels();
+      this.setState({cells});
+
+      // Call stopWheels function to stop all 3 wheels together
+      this.stopWheels();
+
+    }
 
   }
 
@@ -188,8 +199,9 @@ export default class workshop_spin_wheels_1 extends Component {
 
       this.setState({cells});
 
-      // Stop the wheel spinning sound
+      // Stop and release the wheel spinning and cannotSpinSound sounds
       this.wheelsSound.stop( () => this.wheelsSound.release() );
+      this.cannotSpinSound.stop( () => this.wheelsSound.release() );
       // Start showing the arrow buttons column by column
       this.showArrowButtons();
       // Call checkWord function to check the word formed by the wheels
@@ -268,7 +280,8 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Set the state of buttons and images when the spin button is pressed
   onSpinButtonPressSetState() {
-    this.setState({spinButtonDisabled: true});            // Disable spin button
+    //this.setState({spinButtonDisabled: true});            // Disable spin button
+    this.setState({spinButtonDisabled: false});           // Enable the spinButton to play sound
     this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
     this.setState({buttonImageC2Opacity: 0.3});
     this.setState({buttonImageC3Opacity: 0.3});
@@ -597,7 +610,6 @@ export default class workshop_spin_wheels_1 extends Component {
                 cellSpriteScale={this.cellSpriteScale}
                 cellObjs={this.state.cells}
                 scale={this.scale}
-                ////onPress={(cellObj, position) => this.cellPressed(cellObj, position)}
                 onPress={() => this.onSpinButtonPress()}
               />
 
@@ -641,8 +653,8 @@ export default class workshop_spin_wheels_1 extends Component {
 
               <TouchableOpacity
                 disabled={this.state.spinButtonDisabled}
-                onPress={(cellObj, position) => this.cellPressed(cellObj, 0)}
-                style={[styles.spinButton, {backgroundColor: this.state.spinButtonBackgroundColor}]}>
+                style={[styles.spinButton, {backgroundColor: this.state.spinButtonBackgroundColor}]}
+                onPress={(cellObj, position) => this.cellPressed(cellObj, 0)} >
 
                 <Text style={[styles.spinButtonText, {opacity: this.state.spinButtonTextOpacity}]}>SPIN</Text>
 
