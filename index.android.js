@@ -14,6 +14,8 @@ import {
   Button,
   TouchableOpacity,
   Dimensions,
+  Animated,
+  Easing,
 } from 'react-native';
 
 import TimerMixin from 'react-timer-mixin';
@@ -31,6 +33,7 @@ import wordSounds from './js/wordsounds';
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+const inactivityTimeOut = 12000;
 
 var targetWordList;
 var targetWord;
@@ -45,7 +48,7 @@ export default class workshop_spin_wheels_1 extends Component {
     super(props)
     this.state = {
       cells: [],
-      imageOpacity: 0.3,                            // clear image of word
+      imageOpacity: 0.3,                          // clear image of word
       buttonImageC1Opacity: 0.3,                  // arrow buttons are grayed out
       buttonImageC2Opacity: 0.3,
       buttonImageC3Opacity: 0.3,
@@ -67,6 +70,8 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
     this.cannotSpinSound = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
+    this.spinValue = new Animated.Value(1);
+    this.arrowSpringValue = new Animated.Value(1);
 
     var letter1;            // first letter of target word
     var letter2;            // second letter of target word
@@ -85,6 +90,12 @@ export default class workshop_spin_wheels_1 extends Component {
 
   componentWillMount () {
       this.setState({cells: this.createCellObjsArray()});
+      this.setState( () => this.startInactivityMonitor());
+  }
+
+  componentWillUnmount () {
+    TimerMixin.clearInterval(this.intervalGetUser);
+    TimerMixin.clearInterval(this.intervalGetUser2);
   }
 
   createCellObjsArray () {
@@ -209,6 +220,7 @@ export default class workshop_spin_wheels_1 extends Component {
       this.checkWord(letter1, letter2, letter3);
       // Set state of the buttons and images
       this.onStopWheelsSetState();
+      this.startInactivityMonitor2();
     }, 2500);
 
   }
@@ -330,6 +342,8 @@ export default class workshop_spin_wheels_1 extends Component {
 
     // Check if word formed is in current target word list
     this.checkWord(letter1, letter2, letter3);
+    // Spin the text in spin button after 12 seconds of inactivity
+    this.startInactivityMonitor2();
 
     console.log('stopIndWheels (letter1): ' + letter1);
     console.log('stopIndWheels (letter2): ' + letter2);
@@ -439,6 +453,48 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
+  // Function to spin the text in spin button at every 12 second interval
+  startInactivityMonitor () {
+    this.intervalGetUser = TimerMixin.setInterval ( () => {
+      this.spinButtonText();
+    }, inactivityTimeOut);
+  }
+
+  // Function to spin the text in spin button at every 12 second interval
+  // and spring the arrow buttons
+  startInactivityMonitor2 () {
+    this.intervalGetUser2 = TimerMixin.setInterval ( () => {
+      this.spinButtonText();
+      this.springArrows();
+    }, inactivityTimeOut);
+  }
+
+  // Animation to spin the text in the spin button
+  spinButtonText() {
+    this.spinValue.setValue(0);
+    Animated.timing(
+      this.spinValue,
+      {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.elastic(4),
+      }
+    ).start();
+  }
+
+  // Animation to spin the arrow buttons
+  springArrows() {
+    this.arrowSpringValue.setValue(0.3);
+    Animated.spring(
+      this.arrowSpringValue,
+      {
+        toValue: 1,
+        friction: 1,
+        tension: 2
+      }
+    ).start();
+  }
+
   // Function to show (but still slightly gray out) the Up/Down arrows column by column
   showArrowButtons() {
 
@@ -454,19 +510,6 @@ export default class workshop_spin_wheels_1 extends Component {
       this.setState({buttonImageC3Opacity: 0.7});
     }, 2000);
 
-    /*
-    var timeoutId4 = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC1Opacity: 1});
-    }, 2500);
-
-    var timeoutId5 = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC2Opacity: 1});
-    }, 3000);
-
-    var timeoutId6 = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC3Opacity: 1});
-    }, 3500);
-    */
   }
 
   // Function to play an audio of the word formed by the wheels
@@ -570,6 +613,12 @@ export default class workshop_spin_wheels_1 extends Component {
 */
 
   render() {
+
+    const spin = this.spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg']
+    });
+
     return (
       <View style={styles.container}>
         <View style={styles.containerLeft}>
@@ -581,8 +630,15 @@ export default class workshop_spin_wheels_1 extends Component {
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickUp(1)}
                 >
-                <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC1Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC1Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_up.png')}
                 />
 
@@ -592,8 +648,15 @@ export default class workshop_spin_wheels_1 extends Component {
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickUp(2)}
                 >
-                <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC2Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC2Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_up.png')}
                 />
 
@@ -603,10 +666,18 @@ export default class workshop_spin_wheels_1 extends Component {
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickUp(3)}
                 >
-                <Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC3Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC3Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_up.png')}
                 />
+
               </TouchableOpacity>
 
             </View>
@@ -635,30 +706,54 @@ export default class workshop_spin_wheels_1 extends Component {
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickDown(1)}
                 >
-                <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC1Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC1Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_down.png')}
                 />
+
               </TouchableOpacity>
 
               <TouchableOpacity
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickDown(2)}
                 >
-                <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC2Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC2Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_down.png')}
                 />
+
               </TouchableOpacity>
 
               <TouchableOpacity
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickDown(3)}
                 >
-                <Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC3Opacity}]}
+
+                <Animated.Image
+                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC3Opacity},
+                    {
+                      transform: [
+                        {scale: this.arrowSpringValue}
+                      ]
+                    }
+                  ]}
                   source={require('./images/yellow_border_down.png')}
                 />
+
               </TouchableOpacity>
 
             </View>
@@ -668,9 +763,16 @@ export default class workshop_spin_wheels_1 extends Component {
               <TouchableOpacity
                 disabled={this.state.spinButtonDisabled}
                 style={[styles.spinButton, {backgroundColor: this.state.spinButtonBackgroundColor}]}
-                onPress={(cellObj, position) => this.cellPressed(cellObj, 0)} >
+                onPress={(cellObj, position) => this.cellPressed(cellObj, 0)}
+                >
 
-                <Text style={[styles.spinButtonText, {opacity: this.state.spinButtonTextOpacity}]}>SPIN</Text>
+                <Animated.Text style={[styles.spinButtonText,
+                  {
+                    transform: [
+                      {rotate: spin}
+                    ]
+                  }
+                ]}>SPIN</Animated.Text>
 
               </TouchableOpacity>
 
