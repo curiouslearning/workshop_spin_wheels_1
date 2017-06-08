@@ -16,6 +16,7 @@ import {
   Dimensions,
   Animated,
   Easing,
+  Alert,
 } from 'react-native';
 
 import TimerMixin from 'react-timer-mixin';
@@ -70,6 +71,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
     this.cannotSpinSound = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
+    this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
 
@@ -96,6 +98,9 @@ export default class workshop_spin_wheels_1 extends Component {
   componentWillUnmount () {
     TimerMixin.clearInterval(this.intervalGetUser);
     TimerMixin.clearInterval(this.intervalGetUser2);
+    this.wellDoneSound.release();
+    this.wheelsSound.release();
+    this.cannotSpinSound.release();
   }
 
   createCellObjsArray () {
@@ -213,15 +218,46 @@ export default class workshop_spin_wheels_1 extends Component {
 
       // Stop and release the wheel spinning and cannotSpinSound sounds
       this.wheelsSound.stop( () => this.wheelsSound.release() );
-      this.cannotSpinSound.stop( () => this.wheelsSound.release() );
+      this.cannotSpinSound.stop( () => this.cannotSpinSound.release() );
       // Start showing the arrow buttons column by column
       this.showArrowButtons();
+
+      // Set state of the buttons and images
+      //this.onStopWheelsSetState();
+
       // Call checkWord function to check the word formed by the wheels
       this.checkWord(letter1, letter2, letter3);
-      // Set state of the buttons and images
-      this.onStopWheelsSetState();
+
       this.startInactivityMonitor2();
     }, 2500);
+
+  }
+
+  // Function to stop the wheels individually. This function
+  // is called by the Up and Down arrows. The word created by the
+  // three wheels will be checked against the target word list via
+  // the checkWord function
+  stopIndividualWheels (wheelNumber) {
+    const cells = _.cloneDeep(this.state.cells);
+
+    // Stop the individual wheel
+    cells[wheelNumber - 1].animationKey = 'STOPLETTER' + wheelNumber;
+    cells[wheelNumber - 1].loopAnimation = true;
+    cells[wheelNumber - 1].uid = randomstring({length: 7});
+
+    this.setState({cells});
+
+    //this.setState({imageOpacity: 1});
+
+    // Check if word formed is in current target word list
+    this.checkWord(letter1, letter2, letter3);
+    // Spin the text in spin button after 12 seconds of inactivity
+    this.startInactivityMonitor2();
+
+    console.log('stopIndWheels (letter1): ' + letter1);
+    console.log('stopIndWheels (letter2): ' + letter2);
+    console.log('stopIndWheels (letter3): ' + letter3);
+    console.log('wordListLevel: ' + wordListLevel);
 
   }
 
@@ -236,6 +272,16 @@ export default class workshop_spin_wheels_1 extends Component {
     console.log('Is word in List: ' + newWordInList);
 
     if (newWordInList == true) {
+
+      if (this.state.spinButtonBackgroundColor == 'gray') {
+        this.onStopWheelsSetState();
+      } else {
+          this.onSpinButtonPressSetState ();
+          this.onStopWheelsSetState();
+      }
+
+
+
       // Check if the word was not shown before
       if ((wordsShown.indexOf(newWord) > -1) == false) {
         wordsShown.push(newWord);
@@ -255,6 +301,9 @@ export default class workshop_spin_wheels_1 extends Component {
       targetWord = 'unknown';
       // Play the following file when user touched the wheels and 'unknown' image
       targetSound = 'machine_reverse.mp3';
+
+      this.setState({imageOpacity: 1});
+
     }
 
   }
@@ -272,15 +321,24 @@ export default class workshop_spin_wheels_1 extends Component {
 
     // Checks if 50% of word list has been formed
     // If yes, word list is changed to the next level
-    // Currently, the lists are being rotated i.e. 1 to 2 to 3 to 1 to 2 to 3...
+    // Once the last level is reached, game will remain at that level
     if (percentCompleted >= this.state.percentCompleteGoal) {
+
       // Get number of word list available in JSON file
       var jsonLength = wordListUtil.getJsonLength();
       if (wordListLevel < (jsonLength - 1)) {
         wordListLevel = wordListLevel + 1;
         console.log('wordlistlevel: ' + wordListLevel);
+
+        // Announce going to next level
+        TimerMixin.setTimeout( () => {
+          this.showAdvancingNotice();
+          this.wellDoneSound.play();
+        }, 4000);
+
       } else {
-        wordListLevel = 0;
+        //wordListLevel = 0;
+        wordListLevel = jsonLength - 1;
         console.log('wordlistlevel: ' + wordListLevel);
       }
 
@@ -291,8 +349,20 @@ export default class workshop_spin_wheels_1 extends Component {
     }
   }
 
+  // Dialog box to indicate advancing to next level of word list
+  showAdvancingNotice () {
+    Alert.alert(
+      'SPIN WHEELS GAME',
+      'Well done! 50% of word list completed. Going to next level!',
+      [
+        {text: 'OK', onPress: (cellObj, position) => this.cellPressed(cellObj, 0)},
+      ],
+      { cancelable: false }
+    )
+  }
+
   // Set the state of buttons and images when the spin button is pressed
-  onSpinButtonPressSetState() {
+  onSpinButtonPressSetState () {
     //this.setState({spinButtonDisabled: true});            // Disable spin button
     this.setState({spinButtonDisabled: false});           // Enable the spinButton to play sound
     this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
@@ -325,39 +395,13 @@ export default class workshop_spin_wheels_1 extends Component {
 
   }
 
-  // Function to stop the wheels individually. This function
-  // is called by the Up and Down arrows. The word created by the
-  // three wheels will be checked against the target word list via
-  // the checkWord function
-  stopIndividualWheels (wheelNumber) {
-    const cells = _.cloneDeep(this.state.cells);
-
-    // Stop the individual wheel
-    cells[wheelNumber - 1].animationKey = 'STOPLETTER' + wheelNumber;
-    cells[wheelNumber - 1].loopAnimation = true;
-    cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-    this.setState({cells});
-    this.setState({imageOpacity: 1});
-
-    // Check if word formed is in current target word list
-    this.checkWord(letter1, letter2, letter3);
-    // Spin the text in spin button after 12 seconds of inactivity
-    this.startInactivityMonitor2();
-
-    console.log('stopIndWheels (letter1): ' + letter1);
-    console.log('stopIndWheels (letter2): ' + letter2);
-    console.log('stopIndWheels (letter3): ' + letter3);
-    console.log('wordListLevel: ' + wordListLevel);
-
-  }
-
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
-    var wheelLetters1 = wordListUtil.wheelLetters1;
-    var wheelLetters2 = wordListUtil.wheelLetters2;
-    var wheelLetters3 = wordListUtil.wheelLetters3;
+    var wl = require('./json/wordListUtil.js');
+    var wheelLetters1 = wl.wheelLetters1;
+    var wheelLetters2 = wl.wheelLetters2;
+    var wheelLetters3 = wl.wheelLetters3;
 
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
@@ -406,9 +450,10 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
-    var wheelLetters1 = wordListUtil.wheelLetters1;
-    var wheelLetters2 = wordListUtil.wheelLetters2;
-    var wheelLetters3 = wordListUtil.wheelLetters3;
+    var wl = require('./json/wordListUtil.js');
+    var wheelLetters1 = wl.wheelLetters1;
+    var wheelLetters2 = wl.wheelLetters2;
+    var wheelLetters3 = wl.wheelLetters3;
 
     var wheel = eval('wheelLetters' + wheelNumber);
     var wheelLength = wheel.length;
@@ -520,7 +565,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
       if (error) {
         console.log('Failed to load the sound', error);
-        return;
+        //return;
       } else {
         // loaded successfully
         whoosh.play((success) => {
