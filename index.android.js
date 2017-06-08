@@ -36,13 +36,6 @@ const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const inactivityTimeOut = 12000;
 
-var targetWordList;
-var targetWord;
-
-var wordsCompleted;
-var wordsShown;
-var wordListLevel;
-
 export default class workshop_spin_wheels_1 extends Component {
 
   constructor(props) {
@@ -70,23 +63,22 @@ export default class workshop_spin_wheels_1 extends Component {
     this.numColumns = 3;
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
-    this.cannotSpinSound = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
+    this.cannotSpinSound = new Sound('boink.wav', Sound.MAIN_BUNDLE);
     this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
+    this.targetWord = 'unknown';    // set initial target word to unknown
+    this.wordsCompleted = 0;        // for tracking number of words formed from word list
+    this.wordsShown = [];           // for tracking what words were formed by wheels
+    this.wordListLevel = 0;         // word list level from JSON; start with level 0
+
+    // get word list from JSON file via the selectWordList function in wordListUtil.js
+    this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
 
     var letter1;            // first letter of target word
     var letter2;            // second letter of target word
     var letter3;            // third letter of target word
     var targetSound;        // the sound file of the target word
-
-    targetWord = 'unknown';
-    wordListLevel = 0;      // word list level from JSON; start with level 0
-    wordsCompleted = 0;     // for tracking number of words formed from word list
-    wordsShown = [];        // for tracking what words were formed by wheels
-
-    // get word list from JSON file via the selectWordList function in wordListUtil.js
-    targetWordList = wordListUtil.selectWordList(wordListLevel);
 
   }
 
@@ -140,6 +132,7 @@ export default class workshop_spin_wheels_1 extends Component {
     // If no, proceed with spinning the wheels
     if (this.state.spinButtonBackgroundColor == 'gray') {
       //this.cannotSpinSound.play( () => this.wheelsSound.release() );
+      this.cannotSpinSound.setVolume(0.10);
       this.cannotSpinSound.play();
     } else {
 
@@ -177,16 +170,16 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Randomly select a word from the target word list
   nextWord() {
-    targetWord = targetWordList[Math.floor(Math.random() * targetWordList.length)];
+    this.targetWord = this.targetWordList[Math.floor(Math.random() * this.targetWordList.length)];
 
     // Split the target word into individual letters
-    var targetWordArray = targetWord.split("");
+    var targetWordArray = this.targetWord.split("");
     letter1 = targetWordArray[0];
     letter2 = targetWordArray[1];
     letter3 = targetWordArray[2];
 
     // Filename of sound file of target word
-    targetSound = targetWord + '.wav';
+    targetSound = this.targetWord + '.wav';
 
     // Export individual letters; to be used in letterSprite.js
     exports.letter1 = letter1;
@@ -257,7 +250,7 @@ export default class workshop_spin_wheels_1 extends Component {
     console.log('stopIndWheels (letter1): ' + letter1);
     console.log('stopIndWheels (letter2): ' + letter2);
     console.log('stopIndWheels (letter3): ' + letter3);
-    console.log('wordListLevel: ' + wordListLevel);
+    console.log('wordListLevel: ' + this.wordListLevel);
 
   }
 
@@ -267,7 +260,7 @@ export default class workshop_spin_wheels_1 extends Component {
     var newWord = l1 + l2 + l3;
 
     // Check if word formed by wheels is in target word list
-    var newWordInList = (targetWordList.indexOf(newWord) > -1);
+    var newWordInList = (this.targetWordList.indexOf(newWord) > -1);
     console.log('New Word: ' + newWord);
     console.log('Is word in List: ' + newWordInList);
 
@@ -277,20 +270,19 @@ export default class workshop_spin_wheels_1 extends Component {
         this.onStopWheelsSetState();
       } else {
           this.onSpinButtonPressSetState ();
+          this.showArrowButtons();
           this.onStopWheelsSetState();
       }
 
-
-
       // Check if the word was not shown before
-      if ((wordsShown.indexOf(newWord) > -1) == false) {
-        wordsShown.push(newWord);
-        wordsCompleted = wordsCompleted + 1;
+      if ((this.wordsShown.indexOf(newWord) > -1) == false) {
+        this.wordsShown.push(newWord);
+        this.wordsCompleted = this.wordsCompleted + 1;
         // Check percent of word list shown; if >= 50% shown, advance to next level
         this.checkPercentComplete();
       }
 
-      targetWord = newWord;
+      this.targetWord = newWord;
       targetSound = newWord + '.wav';
 
       // Play the audio file of the word
@@ -298,7 +290,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
     } else {
       // If word not in word list, shows an 'unknown' image
-      targetWord = 'unknown';
+      this.targetWord = 'unknown';
       // Play the following file when user touched the wheels and 'unknown' image
       targetSound = 'machine_reverse.mp3';
 
@@ -311,13 +303,13 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function to check percent of words completed from selected target word list
   // If >= 50% of word list formed, advance to next level of word list
   checkPercentComplete() {
-    var wordListLength = targetWordList.length;
-    var percentCompleted = (wordsCompleted/wordListLength) * 100;
+    var wordListLength = this.targetWordList.length;
+    var percentCompleted = (this.wordsCompleted/wordListLength) * 100;
 
-    console.log('Words completed: ' + wordsCompleted);
+    console.log('Words completed: ' + this.wordsCompleted);
     console.log('Total words in list: ' + wordListLength);
     console.log('Percent completed: ' + percentCompleted);
-    console.log('wordsShown[]: ' + wordsShown);
+    console.log('wordsShown[]: ' + this.wordsShown);
 
     // Checks if 50% of word list has been formed
     // If yes, word list is changed to the next level
@@ -326,26 +318,26 @@ export default class workshop_spin_wheels_1 extends Component {
 
       // Get number of word list available in JSON file
       var jsonLength = wordListUtil.getJsonLength();
-      if (wordListLevel < (jsonLength - 1)) {
-        wordListLevel = wordListLevel + 1;
-        console.log('wordlistlevel: ' + wordListLevel);
+      if (this.wordListLevel < (jsonLength - 1)) {
+        this.wordListLevel = this.wordListLevel + 1;
+        console.log('wordlistlevel: ' + this.wordListLevel);
 
         // Announce going to next level
         TimerMixin.setTimeout( () => {
           this.showAdvancingNotice();
           this.wellDoneSound.play();
-        }, 4000);
+        }, 3500);
 
       } else {
         //wordListLevel = 0;
-        wordListLevel = jsonLength - 1;
-        console.log('wordlistlevel: ' + wordListLevel);
+        this.wordListLevel = jsonLength - 1;
+        console.log('wordlistlevel: ' + this.wordListLevel);
       }
 
       // Reset wordsCompleted and wordShown; get new target word list
-      wordsCompleted = 0;
-      wordsShown = [];
-      targetWordList = wordListUtil.selectWordList(wordListLevel);
+      this.wordsCompleted = 0;
+      this.wordsShown = [];
+      this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
     }
   }
 
@@ -365,6 +357,7 @@ export default class workshop_spin_wheels_1 extends Component {
   onSpinButtonPressSetState () {
     //this.setState({spinButtonDisabled: true});            // Disable spin button
     this.setState({spinButtonDisabled: false});           // Enable the spinButton to play sound
+    this.setState({buttonDisabled: true});                // Disable arrow buttons and image
     this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
     this.setState({buttonImageC2Opacity: 0.3});
     this.setState({buttonImageC3Opacity: 0.3});
@@ -391,7 +384,7 @@ export default class workshop_spin_wheels_1 extends Component {
       this.setState({buttonImageC1Opacity: 1});                 // Show the arrow buttons fully
       this.setState({buttonImageC2Opacity: 1});
       this.setState({buttonImageC3Opacity: 1});
-    }, 2500);
+    }, 4000);
 
   }
 
@@ -545,15 +538,15 @@ export default class workshop_spin_wheels_1 extends Component {
 
     var timeoutId = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC1Opacity: 0.7});
-    }, 1000);
+    }, 500);
 
     var timeoutId2 = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC2Opacity: 0.7});
-    }, 1500);
+    }, 1000);
 
     var timeoutId3 = TimerMixin.setTimeout ( () => {
       this.setState({buttonImageC3Opacity: 0.7});
-    }, 2000);
+    }, 1500);
 
   }
 
@@ -626,9 +619,9 @@ export default class workshop_spin_wheels_1 extends Component {
     var wheelLettersH2 = [];
     var wheelLettersH3 = [];
 
-    for(i=0;i<targetWordList.length;i++) {
+    for(i=0;i<this.targetWordList.length;i++) {
       var tempWordArray = [];
-      tempWordArray = targetWordList[i].split("");
+      tempWordArray = this.targetWordList[i].split("");
       for(j=0; j<tempWordArray.length; j++) {
         eval('wheelLettersH'+(j+1)).push(tempWordArray[j]);
         eval('wheelLettersH'+(j+1)).sort();
@@ -835,7 +828,7 @@ export default class workshop_spin_wheels_1 extends Component {
             >
             <Image
               style={[styles.image , {opacity: this.state.imageOpacity}]}
-              source={wordImages[targetWord]}
+              source={wordImages[this.targetWord]}
             />
           </TouchableOpacity>
 

@@ -37,6 +37,7 @@ const wordSounds = {
   bubble_machine: require('../android/app/src/main/res/raw/bubble_machine.mp3'),
   machine_reverse: require('../android/app/src/main/res/raw/machine_reverse.mp3'),
   welldone: require('../android/app/src/main/res/raw/welldone.wav'),
+  boink: require('../android/app/src/main/res/raw/boink.wav'),
 }
 
 export default wordSounds;
