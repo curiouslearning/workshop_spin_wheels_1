@@ -245,7 +245,9 @@ export default class workshop_spin_wheels_1 extends Component {
     // Check if word formed is in current target word list
     this.checkWord(letter1, letter2, letter3);
     // Spin the text in spin button after 12 seconds of inactivity
-    this.startInactivityMonitor2();
+    var timeoutId = TimerMixin.setTimeout( () => {
+      this.startInactivityMonitor2();
+    }, 2500);
 
     console.log('stopIndWheels (letter1): ' + letter1);
     console.log('stopIndWheels (letter2): ' + letter2);
@@ -502,6 +504,15 @@ export default class workshop_spin_wheels_1 extends Component {
   // and spring the arrow buttons
   startInactivityMonitor2 () {
     this.intervalGetUser2 = TimerMixin.setInterval ( () => {
+      this.spinButtonText();
+      this.springArrows();
+    }, inactivityTimeOut);
+  }
+
+  // Function to spin the text in spin button at every 12 second interval
+  // and spring the arrow buttons
+  startInactivityMonitor3 () {
+    this.intervalGetUser3 = TimerMixin.setInterval ( () => {
       this.spinButtonText();
       this.springArrows();
     }, inactivityTimeOut);
@@ -777,6 +788,7 @@ export default class workshop_spin_wheels_1 extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
+                style={styles.imageContainer}
                 disabled={this.state.buttonDisabled}
                 onPress={() => this.onArrowClickDown(3)}
                 >
@@ -925,7 +937,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   image: {
-    margin:50,
+    margin: 50,
     borderColor: "black",
     borderWidth: 4,
     borderRadius: 15,
