@@ -1,0 +1,140 @@
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+} from 'react-native';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#F5FCFF',
+  },
+  containerLeft: {
+    flex: 1.5,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderColor: 'grey',
+    borderRightWidth: 2,
+    height: '100%',
+  },
+  componentsContainer: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'column',
+    backgroundColor: 'lightblue',
+  },
+  upArrowsRow: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+  },
+  downArrowsRow: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+  },
+  wheelsRow: {
+    flex: 2,
+    flexDirection: 'row',
+    borderColor: 'black',
+    borderWidth: 4,
+  },
+  wheel: {
+    backgroundColor: 'lightgreen',
+    marginLeft: 20,
+    marginRight: 20,
+    height: '100%',
+    width: '25%',
+    borderColor: 'black',
+    borderWidth: 4,
+    borderRadius: 15,
+    justifyContent: 'center',
+  },
+  wheelFont: {
+    flex: 1,
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 260,
+    textAlign: 'center',
+    lineHeight: 220,
+  },
+  spinButtonRow: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  spinButton: {
+    height: 100,
+    width: '50%',
+    backgroundColor: 'royalblue',
+    borderColor: 'black',
+    borderWidth: 4,
+    borderRadius: 15,
+  },
+  spinButtonText: {
+    fontWeight: 'bold',
+    fontSize: 40,
+    textAlign: 'center',
+    padding: 20,
+    color: 'white',
+  },
+  containerRight: {
+    flex: 1,
+    padding: 60,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    height: '100%',
+  },
+  image: {
+    margin: 50,
+    borderColor: "black",
+    borderWidth: 4,
+    borderRadius: 15,
+  },
+  imageArrowUp: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 37,
+    width: '20%',
+    height: '70%',
+  },
+  imageArrowDown: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5,
+    marginLeft: 37,
+    marginRight: 37,
+    width: '20%',
+    height: '70%',
+  },
+  imageArrowUpHolder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 35,
+    width: 150,
+    height: '70%',
+  },
+  imageArrowDownHolder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    width: 150,
+    height: '70%',
+    backgroundColor: 'white',
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#333333',
+    marginBottom: 5,
+  },
+});
+
+export default styles;
