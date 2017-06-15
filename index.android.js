@@ -53,6 +53,7 @@ export default class workshop_spin_wheels_1 extends Component {
       spinButtonTextOpacity: 1,
       animatedMatrixPointerEvents: 'none',        // wheels are touch-disabled
       percentCompleteGoal: 50,                    // Percent complete before advancing to next word list
+      animatedSpriteMatrixOpacity: 1,
     }
 
     this.activeCells = [true, true, true];
@@ -748,12 +749,15 @@ export default class workshop_spin_wheels_1 extends Component {
                     ...(this.matrixLocation()),
                     ...(this.matrixSize()),
                     position: 'absolute',
+                    opacity: this.state.animatedSpriteMatrixOpacity,
                   }}
                 dimensions={{columns: this.numColumns, rows: this.numRows}}
                 cellSpriteScale={this.cellSpriteScale}
                 cellObjs={this.state.cells}
                 scale={this.scale}
                 onPress={() => this.onSpinButtonPress()}
+                onPressIn={ () => this.setState({animatedSpriteMatrixOpacity: 0.3}) }
+                onPressOut={ () => this.setState({animatedSpriteMatrixOpacity: 1}) }
               />
 
             </View>
