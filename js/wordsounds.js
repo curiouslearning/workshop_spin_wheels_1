@@ -36,6 +36,7 @@ const wordSounds = {
   zit: require('../android/app/src/main/res/raw/zit.wav'),
   bubble_machine: require('../android/app/src/main/res/raw/bubble_machine.mp3'),
   machine_reverse: require('../android/app/src/main/res/raw/machine_reverse.mp3'),
+  lightbulb_switch: require('../android/app/src/main/res/raw/lightbulb_switch.mp3'),
   welldone: require('../android/app/src/main/res/raw/welldone.wav'),
   boink: require('../android/app/src/main/res/raw/boink.wav'),
 }

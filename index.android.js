@@ -66,9 +66,10 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
     this.cannotSpinSound = new Sound('boink.wav', Sound.MAIN_BUNDLE);
     this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
+    this.arrowClickSound = new Sound('lightbulb_switch.mp3', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
-    this.targetWord = 'unknown';    // set initial target word to unknown
+    this.targetWord = 'unknown';    // set initial target word to unknown.jpg
     this.wordsCompleted = 0;        // for tracking number of words formed from word list
     this.wordsShown = [];           // for tracking what words were formed by wheels
     this.wordListLevel = 0;         // word list level from JSON; start with level 0
@@ -94,6 +95,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wellDoneSound.release();
     this.wheelsSound.release();
     this.cannotSpinSound.release();
+    this.arrowClickSound.release();
   }
 
   createCellObjsArray () {
@@ -215,9 +217,6 @@ export default class workshop_spin_wheels_1 extends Component {
       this.cannotSpinSound.stop( () => this.cannotSpinSound.release() );
       // Start showing the arrow buttons column by column
       this.showArrowButtons();
-
-      // Set state of the buttons and images
-      //this.onStopWheelsSetState();
 
       // Call checkWord function to check the word formed by the wheels
       this.checkWord(letter1, letter2, letter3);
@@ -358,7 +357,6 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Set the state of buttons and images when the spin button is pressed
   onSpinButtonPressSetState () {
-    //this.setState({spinButtonDisabled: true});            // Disable spin button
     this.setState({spinButtonDisabled: false});           // Enable the spinButton to play sound
     this.setState({buttonDisabled: true});                // Disable arrow buttons and image
     this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
@@ -394,6 +392,11 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
+
+    // Play sound to indicate that arrow is touched
+    this.arrowClickSound.play();
+
+    // Get set of letters for each wheel from JSON
     var wl = require('./json/wordListUtil.js');
     var wheelLetters1 = wl.wheelLetters1;
     var wheelLetters2 = wl.wheelLetters2;
@@ -446,6 +449,11 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
+
+    // Play sound to indicate that arrow is touched
+    this.arrowClickSound.play();
+
+    // Get set of letters for each wheel from JSON
     var wl = require('./json/wordListUtil.js');
     var wheelLetters1 = wl.wheelLetters1;
     var wheelLetters2 = wl.wheelLetters2;
