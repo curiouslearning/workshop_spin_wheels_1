@@ -36,7 +36,7 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const inactivityTimeOut = 12000;
-
+//var timeoutId;
 export default class workshop_spin_wheels_1 extends Component {
 
   constructor(props) {
@@ -74,6 +74,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wordsCompleted = 0;        // for tracking number of words formed from word list
     this.wordsShown = [];           // for tracking what words were formed by wheels
     this.wordListLevel = 0;         // word list level from JSON; start with level 0
+    this.timeoutId = '';
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -135,7 +136,6 @@ export default class workshop_spin_wheels_1 extends Component {
     // If yes, play the 'cannotSpinSound' sound
     // If no, proceed with spinning the wheels
     if (this.state.spinButtonBackgroundColor == 'gray') {
-      //this.cannotSpinSound.play( () => this.wheelsSound.release() );
       this.cannotSpinSound.setVolume(0.10);
       this.cannotSpinSound.play();
     } else {
@@ -241,12 +241,10 @@ export default class workshop_spin_wheels_1 extends Component {
 
     this.setState({cells});
 
-    //this.setState({imageOpacity: 1});
-
     // Check if word formed is in current target word list
     this.checkWord(letter1, letter2, letter3);
     // Spin the text in spin button after 12 seconds of inactivity
-    var timeoutId = TimerMixin.setTimeout( () => {
+    this.timeoutId = TimerMixin.setTimeout( () => {
       this.startInactivityMonitor2();
     }, 2500);
 
@@ -269,12 +267,15 @@ export default class workshop_spin_wheels_1 extends Component {
 
     if (newWordInList == true) {
 
+      // Check to see if spin button or arrow button was pressed
+      // 'gray' means spin button was pressed
       if (this.state.spinButtonBackgroundColor == 'gray') {
         this.onStopWheelsSetState();
       } else {
-          this.onSpinButtonPressSetState ();
-          this.showArrowButtons();
-          this.onStopWheelsSetState();
+          //this.onSpinButtonPressSetState ();
+          //this.showArrowButtons();
+          //this.onStopWheelsSetState();
+          console.log('SPIN Button is blue!');
       }
 
       // Check if the word was not shown before
@@ -393,7 +394,8 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
-
+    // Restart timer for monitoring inactivity
+    TimerMixin.clearTimeout(this.timeoutId);
     // Play sound to indicate that arrow is touched
     this.arrowClickSound.play();
 
@@ -410,17 +412,17 @@ export default class workshop_spin_wheels_1 extends Component {
     if (currentIndexInWheel < (wheelLength - 1)) {
       if (wheelNumber == 1) {
         letter1 = wheel[currentIndexInWheel + 1];
-        exports.letter1 = letter1;
+        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[currentIndexInWheel + 1];
-        exports.letter2 = letter2;
+        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[currentIndexInWheel + 1];
-        exports.letter3 = letter3;
+        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       }
@@ -429,17 +431,17 @@ export default class workshop_spin_wheels_1 extends Component {
 
       if (wheelNumber == 1) {
         letter1 = wheel[0];
-        exports.letter1 = letter1;
+        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[0];
-        exports.letter2 = letter2;
+        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[0];
-        exports.letter3 = letter3;
+        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       }
@@ -450,7 +452,8 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
-
+    // Restart timer for monitoring inactivity
+    TimerMixin.clearTimeout(this.timeoutId);
     // Play sound to indicate that arrow is touched
     this.arrowClickSound.play();
 
@@ -467,17 +470,17 @@ export default class workshop_spin_wheels_1 extends Component {
     if (currentIndexInWheel > 0) {
       if (wheelNumber == 1) {
         letter1 = wheel[currentIndexInWheel - 1];
-        exports.letter1 = letter1;
+        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[currentIndexInWheel - 1];
-        exports.letter2 = letter2;
+        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[currentIndexInWheel - 1];
-        exports.letter3 = letter3;
+        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       }
@@ -485,17 +488,17 @@ export default class workshop_spin_wheels_1 extends Component {
     } else {
       if (wheelNumber == 1) {
         letter1 = wheel[wheelLength - 1];
-        exports.letter1 = letter1;
+        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else if (wheelNumber == 2) {
         letter2 = wheel[wheelLength - 1];
-        exports.letter2 = letter2;
+        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[wheelLength - 1];
-        exports.letter3 = letter3;
+        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
         this.stopIndividualWheels(wheelNumber);
 
       }
