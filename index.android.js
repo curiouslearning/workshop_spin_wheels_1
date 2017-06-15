@@ -36,7 +36,7 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const inactivityTimeOut = 12000;
-//var timeoutId;
+
 export default class workshop_spin_wheels_1 extends Component {
 
   constructor(props) {
@@ -67,14 +67,14 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
     this.cannotSpinSound = new Sound('boink.wav', Sound.MAIN_BUNDLE);
     this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
-    this.arrowClickSound = new Sound('lightbulb_switch.mp3', Sound.MAIN_BUNDLE);
+    this.arrowClickSound = new Sound('lever_switch.mp3', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
     this.targetWord = 'unknown';    // set initial target word to unknown.jpg
     this.wordsCompleted = 0;        // for tracking number of words formed from word list
     this.wordsShown = [];           // for tracking what words were formed by wheels
     this.wordListLevel = 0;         // word list level from JSON; start with level 0
-    this.timeoutId = '';
+    this.timeoutId = '';            // id of timeout used in stopIndividualWheels & clearTimeSound functions
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -83,7 +83,7 @@ export default class workshop_spin_wheels_1 extends Component {
     var letter2;            // second letter of target word
     var letter3;            // third letter of target word
     var targetSound;        // the sound file of the target word
-
+    var whoosh;             // for holding Sound object to play audio of word
   }
 
   componentWillMount () {
@@ -98,6 +98,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wheelsSound.release();
     this.cannotSpinSound.release();
     this.arrowClickSound.release();
+    whoosh.release();
   }
 
   createCellObjsArray () {
@@ -115,7 +116,8 @@ export default class workshop_spin_wheels_1 extends Component {
     const size = letterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
-    const top = 22;
+    //const top = 22;
+    const top = (screenHeight/5) - (height/2);
     const left = (screenWidth/4 * 1.06) - (width/2);
     const location = {top, left};
     return location;
@@ -394,10 +396,10 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet down
   onArrowClickDown (wheelNumber) {
-    // Restart timer for monitoring inactivity
-    TimerMixin.clearTimeout(this.timeoutId);
-    // Play sound to indicate that arrow is touched
-    this.arrowClickSound.play();
+    // Call this function to restart timer to monitor inactivity
+    // Also to play sound to indicate the arrow button is touched
+    // And stop audio if audio of word is played
+    this.clearTimeSound();
 
     // Get set of letters for each wheel from JSON
     var wl = require('./json/wordListUtil.js');
@@ -452,10 +454,10 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function for the Down arrow buttons. This will spin the respective
   // wheel one alphabet up
   onArrowClickUp(wheelNumber) {
-    // Restart timer for monitoring inactivity
-    TimerMixin.clearTimeout(this.timeoutId);
-    // Play sound to indicate that arrow is touched
-    this.arrowClickSound.play();
+    // Call this function to restart timer to monitor inactivity
+    // Also to play sound to indicate the arrow button is touched
+    // And stop audio if audio of word is played
+    this.clearTimeSound();
 
     // Get set of letters for each wheel from JSON
     var wl = require('./json/wordListUtil.js');
@@ -504,6 +506,22 @@ export default class workshop_spin_wheels_1 extends Component {
       }
     }
 
+  }
+
+  // Call this function to restart timer to monitor inactivity
+  // Also to play sound to indicate the arrow button is touched
+  // And stop audio if audio of word is played
+  // Function is used after every arrow button is touched
+  clearTimeSound() {
+    // Restart timer for monitoring inactivity
+    TimerMixin.clearTimeout(this.timeoutId);
+    // Play sound to indicate that arrow is touched
+    this.arrowClickSound.play();
+    // Check if audio of word is being played
+    // If yes, stop audio and release resource
+    if(whoosh) {
+        whoosh.stop( () => this.whoosh.release() );
+    }
   }
 
   // Function to spin the text in spin button at every 12 second interval
@@ -577,7 +595,8 @@ export default class workshop_spin_wheels_1 extends Component {
   // Function to play an audio of the word formed by the wheels
   onSpinButtonPress () {
     // Load the sound file variable, targetSound
-    var whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
+    //var whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
+    whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
       console.log('targetSound: ' + targetSound);
 
       if (error) {
