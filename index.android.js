@@ -17,8 +17,10 @@ import {
   Animated,
   Easing,
   Alert,
+  PixelRatio,
 } from 'react-native';
 
+import resolveAssetSource from 'resolveAssetSource';
 import TimerMixin from 'react-timer-mixin';
 import sample from 'lodash.sample';
 import _ from 'lodash';
@@ -32,8 +34,12 @@ import wordImages from './js/wordimages';
 import wordSounds from './js/wordsounds';
 import styles from './style/styles';
 
+const baseWidth = 1024;
+const baseHeight = 768;
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
+const screenWidthScale = screenWidth/baseWidth;
+const screenHeightScale = screenHeight/baseHeight;
 const alphabetList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const inactivityTimeOut = 12000;
 
@@ -44,16 +50,19 @@ export default class workshop_spin_wheels_1 extends Component {
     this.state = {
       cells: [],
       imageOpacity: 0.3,                          // clear image of word
-      buttonImageC1Opacity: 0.3,                  // arrow buttons are grayed out
-      buttonImageC2Opacity: 0.3,
-      buttonImageC3Opacity: 0.3,
+      buttonImageC1Opacity: 0.3,                  // arrow buttons of column 1 are grayed out
+      buttonImageC2Opacity: 0.3,                  // arrow buttons of column 2 are grayed out
+      buttonImageC3Opacity: 0.3,                  // arrow buttons of column 3 are grayed out
       buttonDisabled: true,                       // arrow and image buttons are touch-disabled
       spinButtonDisabled: false,                  // spin button is active
-      spinButtonBackgroundColor: 'royalblue',
-      spinButtonTextOpacity: 1,
+      spinButtonBackgroundColor: 'royalblue',     // background color of the spin button
+      spinButtonTextOpacity: 1,                   // Opacity of the text in the spin button
       animatedMatrixPointerEvents: 'none',        // wheels are touch-disabled
       percentCompleteGoal: 50,                    // Percent complete before advancing to next word list
-      animatedSpriteMatrixOpacity: 1,
+      animatedSpriteMatrixOpacity: 1,             // Opacity of the wheels
+      containerLeftDimensions: undefined,         // Dimensions of the left container; to be set later after rendering
+      imageWidth: 450,                            // Width of image file
+      imageHeight: 480,                           // Height of image file
     }
 
     this.activeCells = [true, true, true];
@@ -61,7 +70,14 @@ export default class workshop_spin_wheels_1 extends Component {
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
     this.scale = {image: 1};
-    this.cellSpriteScale = 1;
+
+    // Checking pixel ratio of device to determine the scale of cell sprite
+    if (PixelRatio.get() <= 2) {
+      this.cellSpriteScale = 1;
+    } else {
+      this.cellSpriteScale = 0.52;
+    }
+
     this.numColumns = 3;
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
@@ -70,11 +86,14 @@ export default class workshop_spin_wheels_1 extends Component {
     this.arrowClickSound = new Sound('lever_switch.mp3', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
-    this.targetWord = 'unknown';    // set initial target word to unknown.jpg
-    this.wordsCompleted = 0;        // for tracking number of words formed from word list
-    this.wordsShown = [];           // for tracking what words were formed by wheels
-    this.wordListLevel = 0;         // word list level from JSON; start with level 0
-    this.timeoutId = '';            // id of timeout used in stopIndividualWheels & clearTimeSound functions
+    this.targetWord = 'unknown';            // set initial target word to unknown.jpg
+    this.wordsCompleted = 0;                // for tracking number of words formed from word list
+    this.wordsShown = [];                   // for tracking what words were formed by wheels
+    this.wordListLevel = 0;                 // word list level from JSON; start with level 0
+    this.timeoutId = '';                    // id of timeout used in stopIndividualWheels & clearTimeSound functions
+    this.containerLeftWidth=screenWidth/2;  // temporarily set the width of left container to half of screen width
+    //this.imageWidth=(screenWidth - this.containerLeftWidth) * 0.85; //0.9 or 0.85
+    //this.imageHeight=screenHeight * 0.65;    //0.6 or 0.7
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -84,11 +103,29 @@ export default class workshop_spin_wheels_1 extends Component {
     var letter3;            // third letter of target word
     var targetSound;        // the sound file of the target word
     var whoosh;             // for holding Sound object to play audio of word
+
+    console.log("screenWidth: " + screenWidth);
+    console.log("screenHeight: " + screenHeight);
+    console.log("pixelRatio: " + PixelRatio.get());
+
   }
 
   componentWillMount () {
       this.setState({cells: this.createCellObjsArray()});
       this.setState( () => this.startInactivityMonitor());
+  }
+
+  componentDidMount () {
+    let source = resolveAssetSource(wordImages[this.targetWord]);
+
+    if (screenHeight > 451) {
+      this.setState({imageWidth: source.width});
+      this.setState({imageHeight: source.height});
+    } else {
+      this.setState({imageWidth: source.width * 0.53});
+      this.setState({imageHeight: source.height * 0.53});
+    }
+
   }
 
   componentWillUnmount () {
@@ -98,7 +135,13 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wheelsSound.release();
     this.cannotSpinSound.release();
     this.arrowClickSound.release();
-    whoosh.release();
+
+    //whoosh.release();
+
+    if(whoosh) {
+      whoosh.stop( () => whoosh.release() );
+    }
+
   }
 
   createCellObjsArray () {
@@ -116,9 +159,8 @@ export default class workshop_spin_wheels_1 extends Component {
     const size = letterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
-    //const top = 22;
-    const top = (screenHeight/5) - (height/2);
-    const left = (screenWidth/4 * 1.06) - (width/2);
+    const top = 0.1 * screenHeight/5;
+    const left = (this.containerLeftWidth/2) - (width/2);
     const location = {top, left};
     return location;
   }
@@ -234,6 +276,7 @@ export default class workshop_spin_wheels_1 extends Component {
   // three wheels will be checked against the target word list via
   // the checkWord function
   stopIndividualWheels (wheelNumber) {
+
     const cells = _.cloneDeep(this.state.cells);
 
     // Stop the individual wheel
@@ -291,6 +334,20 @@ export default class workshop_spin_wheels_1 extends Component {
       this.targetWord = newWord;
       targetSound = newWord + '.wav';
 
+      // Get the dimension of the next image file
+      let source = resolveAssetSource(wordImages[this.targetWord]);
+      // Check if image needs to be resized based on device height
+      if (screenHeight > 451) {
+        this.setState({imageWidth: source.width});
+        this.setState({imageHeight: source.height});
+      } else {
+        this.setState({imageWidth: source.width * 0.53});
+        this.setState({imageHeight: source.height * 0.53});
+      }
+
+      console.log('wordImages[targetword] width: ' + this.state.imageWidth);
+      console.log('wordImages[targetword] height: ' + this.state.imageHeight);
+
       // Play the audio file of the word
       this.onSpinButtonPress();
 
@@ -299,6 +356,19 @@ export default class workshop_spin_wheels_1 extends Component {
       this.targetWord = 'unknown';
       // Play the following file when user touched the wheels and 'unknown' image
       targetSound = 'machine_reverse.mp3';
+
+      let source = resolveAssetSource(wordImages[this.targetWord]);
+
+      if (screenHeight > 451) {
+        this.setState({imageWidth: source.width});
+        this.setState({imageHeight: source.height});
+      } else {
+        this.setState({imageWidth: source.width * 0.53});
+        this.setState({imageHeight: source.height * 0.53});
+      }
+
+      console.log('wordImages[targetword] width: ' + this.state.imageWidth);
+      console.log('wordImages[targetword] height: ' + this.state.imageHeight);
 
       this.setState({imageOpacity: 1});
 
@@ -516,11 +586,15 @@ export default class workshop_spin_wheels_1 extends Component {
     // Restart timer for monitoring inactivity
     TimerMixin.clearTimeout(this.timeoutId);
     // Play sound to indicate that arrow is touched
+    //this.arrowClickSound.stop( () => this.arrowClickSound.play() );
     this.arrowClickSound.play();
+
     // Check if audio of word is being played
     // If yes, stop audio and release resource
     if(whoosh) {
-        whoosh.stop( () => this.whoosh.release() );
+        //whoosh.stop( () => whoosh.release() );
+        whoosh.stop( () => whoosh.play() );
+        //whoosh.stop();
     }
   }
 
@@ -693,8 +767,29 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 */
 
+  // Function to measure the width of the left container
+  // This function is called by View holding the AnimatedSpriteMatrix
+  // Width value is needed to help set the location of wheels
+  // This is done so that app can be used in tablets and phones
+  onLayout = event => {
+    if (this.state.containerLeftDimensions)
+      return
+    let {width, height} = event.nativeEvent.layout
+    this.setState({ containerLeftDimensions: {width, height}})
+    this.containerLeftWidth = width;
+  }
+
   render() {
 
+    // Save the width and height of left container
+    if (this.state.containerLeftDimensions) {
+      var { containerLeftDimensions } = this.state
+      var { width, height } = containerLeftDimensions
+      console.log('containerLeft Width: ' + width);
+      console.log('containerLeft Height: ' + height);
+    }
+
+    // Variables used in the spin animation of the spin button text
     const spin = this.spinValue.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg']
@@ -764,7 +859,8 @@ export default class workshop_spin_wheels_1 extends Component {
             </View>
 
             <View style={styles.wheelsRow}
-              pointerEvents={this.state.animatedMatrixPointerEvents}>
+              pointerEvents={this.state.animatedMatrixPointerEvents}
+              onLayout={this.onLayout}>
 
               <AnimatedSpriteMatrix
                 styles={{
@@ -874,7 +970,7 @@ export default class workshop_spin_wheels_1 extends Component {
             onPress={() => this.onSpinButtonPress()}
             >
             <Image
-              style={[styles.image , {opacity: this.state.imageOpacity}]}
+              style={[styles.image , {opacity: this.state.imageOpacity}, {width: this.state.imageWidth}, {height: this.state.imageHeight}]}
               source={wordImages[this.targetWord]}
             />
           </TouchableOpacity>
