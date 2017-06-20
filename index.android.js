@@ -84,14 +84,15 @@ export default class workshop_spin_wheels_1 extends Component {
     this.cannotSpinSound = new Sound('boink.wav', Sound.MAIN_BUNDLE);
     this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
     this.arrowClickSound = new Sound('lever_switch.mp3', Sound.MAIN_BUNDLE);
+    this.whoosh = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
     this.spinValue = new Animated.Value(1);
     this.arrowSpringValue = new Animated.Value(1);
-    this.targetWord = 'unknown';            // set initial target word to unknown.jpg
-    this.wordsCompleted = 0;                // for tracking number of words formed from word list
-    this.wordsShown = [];                   // for tracking what words were formed by wheels
-    this.wordListLevel = 0;                 // word list level from JSON; start with level 0
-    this.timeoutId = '';                    // id of timeout used in stopIndividualWheels & clearTimeSound functions
-    this.containerLeftWidth=screenWidth/2;  // temporarily set the width of left container to half of screen width
+    this.targetWord = 'unknown';              // set initial target word to unknown.jpg
+    this.wordsCompleted = 0;                  // for tracking number of words formed from word list
+    this.wordsShown = [];                     // for tracking what words were formed by wheels
+    this.wordListLevel = 0;                   // word list level from JSON; start with level 0
+    this.timeoutId = '';                      // id of timeout used in stopIndividualWheels & clearTimeSound functions
+    this.containerLeftWidth = screenWidth/2;  // temporarily set the width of left container to half of screen width
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -100,7 +101,6 @@ export default class workshop_spin_wheels_1 extends Component {
     var letter2;            // second letter of target word
     var letter3;            // third letter of target word
     var targetSound;        // the sound file of the target word
-    var whoosh;             // for holding Sound object to play audio of word
 
     console.log("screenWidth: " + screenWidth);
     console.log("screenHeight: " + screenHeight);
@@ -114,19 +114,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   componentDidMount () {
-    let source = resolveAssetSource(wordImages[this.targetWord]);
-
-    if (screenWidthScale > 1) {
-      this.setState({imageWidth: source.width});
-      this.setState({imageHeight: source.height});
-    } else if (screenWidthScale === 1) {
-      this.setState({imageWidth: source.width * 0.95});
-      this.setState({imageHeight: source.height * 0.95});
-    } else if (screenWidthScale < 1) {
-      this.setState({imageWidth: source.width * 0.53});
-      this.setState({imageHeight: source.height * 0.53});
-    }
-
+    this.setImageWidthHeight();
   }
 
   componentWillUnmount () {
@@ -136,13 +124,15 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wheelsSound.release();
     this.cannotSpinSound.release();
     this.arrowClickSound.release();
+    this.whoosh.release();
 
-    //whoosh.release();
-
-    if(whoosh) {
-      whoosh.stop( () => whoosh.release() );
+    /*
+    if(this.whoosh) {
+        this.whoosh.stop( () => {
+          this.whoosh.release();
+        });
     }
-
+    */
   }
 
   createCellObjsArray () {
@@ -171,6 +161,30 @@ export default class workshop_spin_wheels_1 extends Component {
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
     return {width, height};
+  }
+
+  // Function to set width and height of image of word
+  // This is to allow app to respond to different tablet and phone sizes
+  setImageWidthHeight () {
+    // Get the dimension of the next image file
+    let source = resolveAssetSource(wordImages[this.targetWord]);
+    // Check if image needs to be resized based on device width
+    if (screenWidthScale > 1) {
+      this.setState({
+        imageWidth: source.width,
+        imageHeight: source.height
+      });
+    } else if (screenWidthScale === 1) {
+      this.setState({
+        imageWidth: source.width * 0.95,
+        imageHeight: source.height * 0.95
+      });
+    } else if (screenWidthScale < 1) {
+      this.setState({
+        imageWidth: source.width * 0.53,
+        imageHeight: source.height * 0.53
+      });
+    }
   }
 
   // Function called by Spin Button to spin the wheels
@@ -214,7 +228,6 @@ export default class workshop_spin_wheels_1 extends Component {
       this.stopWheels();
 
     }
-
   }
 
   // Randomly select a word from the target word list
@@ -259,8 +272,18 @@ export default class workshop_spin_wheels_1 extends Component {
       this.setState({cells});
 
       // Stop and release the wheel spinning and cannotSpinSound sounds
-      this.wheelsSound.stop( () => this.wheelsSound.release() );
-      this.cannotSpinSound.stop( () => this.cannotSpinSound.release() );
+      //this.wheelsSound.stop();
+      //this.wheelsSound.release();
+      //this.cannotSpinSound.stop();
+      //this.cannotSpinSound.release();
+
+      this.wheelsSound.stop( () => {
+        this.wheelsSound.release();
+      });
+      this.cannotSpinSound.stop( () => {
+        this.cannotSpinSound.release();
+      });
+
       // Start showing the arrow buttons column by column
       this.showArrowButtons();
 
@@ -335,22 +358,8 @@ export default class workshop_spin_wheels_1 extends Component {
       this.targetWord = newWord;
       targetSound = newWord + '.wav';
 
-      // Get the dimension of the next image file
-      let source = resolveAssetSource(wordImages[this.targetWord]);
-      // Check if image needs to be resized based on device height
-      if (screenWidthScale > 1) {
-        this.setState({imageWidth: source.width});
-        this.setState({imageHeight: source.height});
-      } else if (screenWidthScale === 1) {
-        this.setState({imageWidth: source.width * 0.95});
-        this.setState({imageHeight: source.height * 0.95});
-      } else if (screenWidthScale < 1) {
-        this.setState({imageWidth: source.width * 0.53});
-        this.setState({imageHeight: source.height * 0.53});
-      }
-
-      console.log('wordImages[targetword] width: ' + this.state.imageWidth);
-      console.log('wordImages[targetword] height: ' + this.state.imageHeight);
+      // Call function to set width and height of image of word
+      this.setImageWidthHeight();
 
       // Play the audio file of the word
       this.onSpinButtonPress();
@@ -361,21 +370,8 @@ export default class workshop_spin_wheels_1 extends Component {
       // Play the following file when user touched the wheels and 'unknown' image
       targetSound = 'machine_reverse.mp3';
 
-      let source = resolveAssetSource(wordImages[this.targetWord]);
-
-      if (screenWidthScale > 1) {
-        this.setState({imageWidth: source.width});
-        this.setState({imageHeight: source.height});
-      } else if (screenWidthScale === 1) {
-        this.setState({imageWidth: source.width * 0.95});
-        this.setState({imageHeight: source.height * 0.95});
-      } else if (screenWidthScale < 1) {
-        this.setState({imageWidth: source.width * 0.53});
-        this.setState({imageHeight: source.height * 0.53});
-      }
-
-      console.log('wordImages[targetword] width: ' + this.state.imageWidth);
-      console.log('wordImages[targetword] height: ' + this.state.imageHeight);
+      // Call function to set width and height of image of word
+      this.setImageWidthHeight();
 
       this.setState({imageOpacity: 1});
 
@@ -411,6 +407,13 @@ export default class workshop_spin_wheels_1 extends Component {
           this.wellDoneSound.play();
         }, 3500);
 
+        // Stop and release audio resources
+        TimerMixin.setTimeout( () => {
+          this.wellDoneSound.stop( () => {
+              this.wellDoneSound.release();
+          });
+        }, 10000);
+
       } else {
         //wordListLevel = 0;
         this.wordListLevel = jsonLength - 1;
@@ -438,15 +441,17 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Set the state of buttons and images when the spin button is pressed
   onSpinButtonPressSetState () {
-    this.setState({spinButtonDisabled: false});           // Enable the spinButton to play sound
-    this.setState({buttonDisabled: true});                // Disable arrow buttons and image
-    this.setState({buttonImageC1Opacity: 0.3});           // Gray out the arrow buttons
-    this.setState({buttonImageC2Opacity: 0.3});
-    this.setState({buttonImageC3Opacity: 0.3});
-    this.setState({spinButtonTextOpacity: 0.5});          // Gray out the text on spin button
-    this.setState({spinButtonBackgroundColor: 'gray'});   // Gray out the background of spin button
-    this.setState({imageOpacity: 0});                     // Remove image of word
-    this.setState({animatedMatrixPointerEvents: 'none'}); // Disable the wheels from touch
+    this.setState({
+      spinButtonDisabled: false,           // Enable the spinButton to play sound
+      buttonDisabled: true,                // Disable arrow buttons and image
+      buttonImageC1Opacity: 0.3,           // Gray out the arrow buttons
+      buttonImageC2Opacity: 0.3,
+      buttonImageC3Opacity: 0.3,
+      spinButtonTextOpacity: 0.5,          // Gray out the text on spin button
+      spinButtonBackgroundColor: 'gray',   // Gray out the background of spin button
+      imageOpacity: 0,                     // Remove image of word
+      animatedMatrixPointerEvents: 'none'  // Disable the wheels from touch
+    });
   }
 
   // Set the state of buttons and images when the wheels stop spinning
@@ -458,16 +463,17 @@ export default class workshop_spin_wheels_1 extends Component {
 
     // Set the following states after 2.5 seconds to allow audio file to play completely
     var timeoutId2 = TimerMixin.setTimeout( () => {
-      this.setState({buttonDisabled: false});                   // Enable the arrow buttons
-      this.setState({spinButtonDisabled: false});               // Enable the spin button
-      this.setState({spinButtonBackgroundColor: 'royalblue'});
-      this.setState({spinButtonTextOpacity: 1});
-      this.setState({animatedMatrixPointerEvents: 'auto'});     // Enable the wheels (touch-enabled)
-      this.setState({buttonImageC1Opacity: 1});                 // Show the arrow buttons fully
-      this.setState({buttonImageC2Opacity: 1});
-      this.setState({buttonImageC3Opacity: 1});
+      this.setState({
+        buttonDisabled: false,                   // Enable the arrow buttons
+        spinButtonDisabled: false,               // Enable the spin button
+        spinButtonBackgroundColor: 'royalblue',
+        spinButtonTextOpacity: 1,
+        animatedMatrixPointerEvents: 'auto',     // Enable the wheels (touch-enabled)
+        buttonImageC1Opacity: 1,                 // Show the arrow buttons fully
+        buttonImageC2Opacity: 1,
+        buttonImageC3Opacity: 1
+      });
     }, 4000);
-
   }
 
   // Function for the Down arrow buttons. This will spin the respective
@@ -593,16 +599,19 @@ export default class workshop_spin_wheels_1 extends Component {
     // Restart timer for monitoring inactivity
     TimerMixin.clearTimeout(this.timeoutId);
     // Play sound to indicate that arrow is touched
-    //this.arrowClickSound.stop( () => this.arrowClickSound.play() );
     this.arrowClickSound.play();
 
-    // Check if audio of word is being played
-    // If yes, stop audio and release resource
-    if(whoosh) {
-        //whoosh.stop( () => whoosh.release() );
-        whoosh.stop( () => whoosh.play() );
-        //whoosh.stop();
+    // If audio of word is being played
+    // Stop audio and release resource
+    this.whoosh.stop();
+    this.whoosh.release();
+    /*
+    if(this.whoosh) {
+        this.whoosh.stop( () => {
+          this.whoosh.release();
+        });
     }
+    */
   }
 
   // Function to spin the text in spin button at every 12 second interval
@@ -675,9 +684,14 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Function to play an audio of the word formed by the wheels
   onSpinButtonPress () {
+
+    // Stop and release previous sound
+    this.whoosh.stop();
+    this.whoosh.release();
+
     // Load the sound file variable, targetSound
-    //var whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
-    whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
+    //whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
+    this.whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
       console.log('targetSound: ' + targetSound);
 
       if (error) {
@@ -685,9 +699,9 @@ export default class workshop_spin_wheels_1 extends Component {
         //return;
       } else {
         // loaded successfully
-        whoosh.play((success) => {
+        this.whoosh.play((success) => {
           if (success) {
-            whoosh.release();
+            this.whoosh.release();
             console.log('successfully finished playing');
             //console.log('Duration in seconds: ' + whoosh.getDuration() + 'Number of channels: ' + whoosh.getNumberOfChannels())
           } else {
@@ -699,80 +713,39 @@ export default class workshop_spin_wheels_1 extends Component {
     });
 
     // Reduce the volume by half
-    whoosh.setVolume(0.5);
+    this.whoosh.setVolume(0.5);
 
     // Position the sound to the full right in a stereo field
-    whoosh.setPan(1);
+    this.whoosh.setPan(1);
 
     // Loop indefinitely until stop() is called
-    whoosh.setNumberOfLoops(-1);
+    this.whoosh.setNumberOfLoops(-1);
 
     // Get properties of the player instance
-    console.log('volume: ' + whoosh.getVolume());
-    console.log('pan: ' + whoosh.getPan());
-    console.log('loops: ' + whoosh.getNumberOfLoops());
+    //console.log('volume: ' + whoosh.getVolume());
+    //console.log('pan: ' + whoosh.getPan());
+    //console.log('loops: ' + whoosh.getNumberOfLoops());
 
     // Seek to a specific point in seconds
-    whoosh.setCurrentTime(2.5);
+    this.whoosh.setCurrentTime(2.5);
 
     // Get the current playback point in seconds
-    whoosh.getCurrentTime((seconds) => console.log('at ' + seconds));
+    this.whoosh.getCurrentTime((seconds) => console.log('at ' + seconds));
 
     // Pause the sound
-    whoosh.pause();
+    this.whoosh.pause();
 
     // Stop the sound and rewind to the beginning
-    whoosh.stop(() => {
+    this.whoosh.stop(() => {
       // Note: If you want to play a sound after stopping and rewinding it,
       // it is important to call play() in a callback.
-      whoosh.play();
+      this.whoosh.play();
     });
 
     // Release the audio player resource
-    whoosh.release();
+    this.whoosh.release();
 
   }
-
-  // Function to split each word in the target word list into individual letters.
-  // The first letter of each word will be assigned to wheel 1, the second letter
-  // to wheel 2, and the third letter to wheel 3. This function was used in the
-  // beginning when JSON was not used.
-  // Currently not used
-/*  splitWords() {
-    var wheelLettersH1 = [];
-    var wheelLettersH2 = [];
-    var wheelLettersH3 = [];
-
-    for(i=0;i<this.targetWordList.length;i++) {
-      var tempWordArray = [];
-      tempWordArray = this.targetWordList[i].split("");
-      for(j=0; j<tempWordArray.length; j++) {
-        eval('wheelLettersH'+(j+1)).push(tempWordArray[j]);
-        eval('wheelLettersH'+(j+1)).sort();
-      }
-    }
-
-    wheelLetters1 = [...new Set(wheelLettersH1)];
-    wheelLetters2 = [...new Set(wheelLettersH2)];
-    wheelLetters3 = [...new Set(wheelLettersH3)];
-
-  }
-*/
-
-  // Function to add additional consonants to wheel1 and wheel2
-  // This function was used in the beginning when JSON was not used.
-  // Currently unused
-/*  addConsonant() {
-    wheelLetters1.push("q");
-    wheelLetters3.push("c","u","z");
-    wheelLetters1.sort();
-    wheelLetters3.sort();
-
-    exports.wheelLetters1 = wheelLetters1;
-    exports.wheelLetters2 = wheelLetters2;
-    exports.wheelLetters3 = wheelLetters3;
-  }
-*/
 
   // Function to measure the width of the left container
   // This function is called by View holding the AnimatedSpriteMatrix
