@@ -50,9 +50,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.state = {
       cells: [],
       imageOpacity: 0.3,                          // clear image of word
-      buttonImageC1Opacity: 0.3,                  // arrow buttons of column 1 are grayed out
-      buttonImageC2Opacity: 0.3,                  // arrow buttons of column 2 are grayed out
-      buttonImageC3Opacity: 0.3,                  // arrow buttons of column 3 are grayed out
+      buttonImageC1Opacity: 0,                  // arrow buttons of column 1 are grayed out (opacity originally at 0.3)
+      buttonImageC2Opacity: 0,                  // arrow buttons of column 2 are grayed out (opacity originally at 0.3)
+      buttonImageC3Opacity: 0,                  // arrow buttons of column 3 are grayed out (opacity originally at 0.3)
       buttonDisabled: true,                       // arrow and image buttons are touch-disabled
       spinButtonDisabled: false,                  // spin button is active
       spinButtonBackgroundColor: 'royalblue',     // background color of the spin button
@@ -285,7 +285,7 @@ export default class workshop_spin_wheels_1 extends Component {
       });
 
       // Start showing the arrow buttons column by column
-      this.showArrowButtons();
+      //this.showArrowButtons();
 
       // Call checkWord function to check the word formed by the wheels
       this.checkWord(letter1, letter2, letter3);
@@ -444,9 +444,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({
       spinButtonDisabled: false,           // Enable the spinButton to play sound
       buttonDisabled: true,                // Disable arrow buttons and image
-      buttonImageC1Opacity: 0.3,           // Gray out the arrow buttons
-      buttonImageC2Opacity: 0.3,
-      buttonImageC3Opacity: 0.3,
+      buttonImageC1Opacity: 0,             // Gray out the arrow buttons (opacity originally at 0.3)
+      buttonImageC2Opacity: 0,             // Gray out the arrow buttons (opacity originally at 0.3)
+      buttonImageC3Opacity: 0,             // Gray out the arrow buttons (opacity originally at 0.3)
       spinButtonTextOpacity: 0.5,          // Gray out the text on spin button
       spinButtonBackgroundColor: 'gray',   // Gray out the background of spin button
       imageOpacity: 0,                     // Remove image of word
