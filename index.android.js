@@ -92,8 +92,6 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wordListLevel = 0;                 // word list level from JSON; start with level 0
     this.timeoutId = '';                    // id of timeout used in stopIndividualWheels & clearTimeSound functions
     this.containerLeftWidth=screenWidth/2;  // temporarily set the width of left container to half of screen width
-    //this.imageWidth=(screenWidth - this.containerLeftWidth) * 0.85; //0.9 or 0.85
-    //this.imageHeight=screenHeight * 0.65;    //0.6 or 0.7
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -118,10 +116,13 @@ export default class workshop_spin_wheels_1 extends Component {
   componentDidMount () {
     let source = resolveAssetSource(wordImages[this.targetWord]);
 
-    if (screenHeight > 451) {
+    if (screenWidthScale > 1) {
       this.setState({imageWidth: source.width});
       this.setState({imageHeight: source.height});
-    } else {
+    } else if (screenWidthScale === 1) {
+      this.setState({imageWidth: source.width * 0.95});
+      this.setState({imageHeight: source.height * 0.95});
+    } else if (screenWidthScale < 1) {
       this.setState({imageWidth: source.width * 0.53});
       this.setState({imageHeight: source.height * 0.53});
     }
@@ -337,10 +338,13 @@ export default class workshop_spin_wheels_1 extends Component {
       // Get the dimension of the next image file
       let source = resolveAssetSource(wordImages[this.targetWord]);
       // Check if image needs to be resized based on device height
-      if (screenHeight > 451) {
+      if (screenWidthScale > 1) {
         this.setState({imageWidth: source.width});
         this.setState({imageHeight: source.height});
-      } else {
+      } else if (screenWidthScale === 1) {
+        this.setState({imageWidth: source.width * 0.95});
+        this.setState({imageHeight: source.height * 0.95});
+      } else if (screenWidthScale < 1) {
         this.setState({imageWidth: source.width * 0.53});
         this.setState({imageHeight: source.height * 0.53});
       }
@@ -359,10 +363,13 @@ export default class workshop_spin_wheels_1 extends Component {
 
       let source = resolveAssetSource(wordImages[this.targetWord]);
 
-      if (screenHeight > 451) {
+      if (screenWidthScale > 1) {
         this.setState({imageWidth: source.width});
         this.setState({imageHeight: source.height});
-      } else {
+      } else if (screenWidthScale === 1) {
+        this.setState({imageWidth: source.width * 0.95});
+        this.setState({imageHeight: source.height * 0.95});
+      } else if (screenWidthScale < 1) {
         this.setState({imageWidth: source.width * 0.53});
         this.setState({imageHeight: source.height * 0.53});
       }
