@@ -31,7 +31,6 @@ import Sound from 'react-native-sound';
 import letterSprite from './sprites/letterSprite/letterSprite';
 import wordListUtil from './json/wordListUtil';
 import WordImages from './js/WordImages';
-//import WordSounds from './js/WordSounds';
 import styles from './style/styles';
 
 const baseWidth = 1024;
@@ -70,14 +69,6 @@ export default class workshop_spin_wheels_1 extends Component {
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
     this.scale = { image: 1 };
-
-    // Checking pixel ratio of device to determine the scale of cell sprite
-    if (PixelRatio.get() <= 2) {
-      this.cellSpriteScale = 1;
-    } else {
-      this.cellSpriteScale = 0.52;
-    }
-
     this.numColumns = 3;
     this.numRows = 1;
     this.wheelsSound = new Sound('bubble_machine.mp3', Sound.MAIN_BUNDLE);
@@ -93,13 +84,20 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wordListLevel = 0;                           // word list level from JSON; start with level 0
     this.timeoutId = '';                              // id of timeout used in stopIndividualWheels & clearTimeSound functions
     this.containerLeftWidth = screenWidth/2;          // temporarily set the width of left container to half of screen width
+    this.letter1 = '';                                // first letter of target word
+    this.letter2 = '';                                // second letter of target word
+    this.letter3 = '';                                // third letter of target word
+
+    // Checking pixel ratio of device to determine the scale of cell sprite
+    if (PixelRatio.get() <= 2) {
+      this.cellSpriteScale = 1;
+    } else {
+      this.cellSpriteScale = 0.52;
+    }
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
 
-    let letter1;            // first letter of target word
-    let letter2;            // second letter of target word
-    let letter3;            // third letter of target word
     let targetSound;        // the sound file of the target word
 
     console.log("screenWidth: " + screenWidth);
@@ -107,16 +105,16 @@ export default class workshop_spin_wheels_1 extends Component {
     console.log("pixelRatio: " + PixelRatio.get());
   }
 
-  componentWillMount () {
+  componentWillMount() {
       this.setState({cells: this.createCellObjsArray()});
       this.setState( () => this.startInactivityMonitorNoArrows());
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.setImageWidthHeight();
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     TimerMixin.clearInterval(this.intervalGetUser);
     TimerMixin.clearInterval(this.intervalGetUser2);
     this.wellDoneSound.release();
@@ -124,17 +122,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.cannotSpinSound.release();
     this.arrowClickSound.release();
     this.whoosh.release();
-
-    /*
-    if(this.whoosh) {
-        this.whoosh.stop( () => {
-          this.whoosh.release();
-        });
-    }
-    */
   }
 
-  createCellObjsArray () {
+  createCellObjsArray() {
     const cells = _.map(this.activeCells , (active, index) => ({
       sprite: this.sprites[index],
       animationKey: this.animationKeys[index],
@@ -145,7 +135,7 @@ export default class workshop_spin_wheels_1 extends Component {
     return cells;
   }
 
-  matrixLocation () {
+  matrixLocation() {
     const size = letterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
@@ -155,7 +145,7 @@ export default class workshop_spin_wheels_1 extends Component {
     return location;
   }
 
-  matrixSize () {
+  matrixSize() {
     const size = letterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
@@ -166,7 +156,7 @@ export default class workshop_spin_wheels_1 extends Component {
   * Function to set width and height of image of word
   * This is to allow app to respond to different tablet and phone sizes
   */
-  setImageWidthHeight () {
+  setImageWidthHeight() {
     // Get the dimension of the next image file
     let source = resolveAssetSource(WordImages[this.targetWord]);
 
@@ -194,7 +184,7 @@ export default class workshop_spin_wheels_1 extends Component {
   * A word from the target word list will be selected
   * via the nextWord() function
   */
-  cellPressed (cellObj, position) {
+  cellPressed(cellObj, position) {
     /**
     * Check if spinButtonBackgroundColor is gray (when wheels are spinning)
     * If yes, play the 'cannotSpinSound' sound
@@ -238,17 +228,17 @@ export default class workshop_spin_wheels_1 extends Component {
 
     // Split the target word into individual letters
     let targetWordArray = this.targetWord.split("");
-    letter1 = targetWordArray[0];
-    letter2 = targetWordArray[1];
-    letter3 = targetWordArray[2];
+    this.letter1 = targetWordArray[0];
+    this.letter2 = targetWordArray[1];
+    this.letter3 = targetWordArray[2];
 
     // Filename of sound file of target word
     targetSound = this.targetWord + '.wav';
 
     // Export individual letters; to be used in letterSprite.js
-    exports.letter1 = letter1;
-    exports.letter2 = letter2;
-    exports.letter3 = letter3;
+    exports.letter1 = this.letter1;
+    exports.letter2 = this.letter2;
+    exports.letter3 = this.letter3;
   }
 
   /**
@@ -282,10 +272,10 @@ export default class workshop_spin_wheels_1 extends Component {
       });
 
       // Start showing the arrow buttons column by column
-      //this.showArrowButtons();
+      // this.showArrowButtons();
 
       // Call checkWord function to check the word formed by the wheels
-      this.checkWord(letter1, letter2, letter3);
+      this.checkWord(this.letter1, this.letter2, this.letter3);
 
       this.startInactivityMonitorWithArrows();
     }, 2500);
@@ -297,7 +287,7 @@ export default class workshop_spin_wheels_1 extends Component {
   * three wheels will be checked against the target word list via
   * the checkWord function
   */
-  stopIndividualWheels (wheelNumber) {
+  stopIndividualWheels(wheelNumber) {
     const cells = _.cloneDeep(this.state.cells);
 
     // Stop the individual wheel
@@ -307,16 +297,16 @@ export default class workshop_spin_wheels_1 extends Component {
     this.setState({ cells });
 
     // Check if word formed is in current target word list
-    this.checkWord(letter1, letter2, letter3);
+    this.checkWord(this.letter1, this.letter2, this.letter3);
 
     // Spin the text in spin button after 12 seconds of inactivity
     this.timeoutId = TimerMixin.setTimeout( () => {
       this.startInactivityMonitorWithArrows();
     }, 2500);
 
-    console.log('stopIndWheels (letter1): ' + letter1);
-    console.log('stopIndWheels (letter2): ' + letter2);
-    console.log('stopIndWheels (letter3): ' + letter3);
+    console.log('stopIndWheels (this.letter1): ' + this.letter1);
+    console.log('stopIndWheels (this.letter2): ' + this.letter2);
+    console.log('stopIndWheels (this.letter3): ' + this.letter3);
     console.log('wordListLevel: ' + this.wordListLevel);
   }
 
@@ -342,7 +332,7 @@ export default class workshop_spin_wheels_1 extends Component {
       if (this.state.spinButtonBackgroundColor === 'gray') {
         this.onStopWheelsSetState();
       }
-      
+
       this.targetWord = newWord;
       targetSound = newWord + '.wav';
 
@@ -360,7 +350,6 @@ export default class workshop_spin_wheels_1 extends Component {
         // Check percent of word list shown; if >= 50% shown, advance to next level
         this.checkPercentComplete();
       }
-
     } else {
       // If word not in word list, shows an 'unknown' image
       this.targetWord = 'unknown';
@@ -413,7 +402,6 @@ export default class workshop_spin_wheels_1 extends Component {
               this.wellDoneSound.release();
           });
         }, 10000);
-
       } else {
         //wordListLevel = 0;
         this.wordListLevel = jsonLength - 1;
@@ -428,7 +416,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   // Dialog box to indicate advancing to next level of word list
-  showAdvancingNotice () {
+  showAdvancingNotice() {
     Alert.alert(
       'SPIN WHEELS GAME',
       'Well done! 50% of word list completed. Going to next level!',
@@ -440,7 +428,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   // Set the state of buttons and images when the spin button is pressed
-  onSpinButtonPressSetState () {
+  onSpinButtonPressSetState() {
     this.setState({
       spinButtonDisabled: false,           // Enable the spinButton to play sound
       buttonDisabled: true,                // Disable arrow buttons and image
@@ -477,10 +465,30 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   /**
+  * Function to get letters in specific wheel, number of letters
+  * in specific wheels, and index of current letter in wheesl
+  * from JSON file via the wordListUtil.js file
+  */
+  getLettersInWheels(wheelNumber) {
+    // Get set of letters for each wheel from JSON
+    let wl = require('./json/wordListUtil.js');
+    let wheelLetters1 = wl.wheelLetters1;
+    let wheelLetters2 = wl.wheelLetters2;
+    let wheelLetters3 = wl.wheelLetters3;
+
+    // Return values as objects based on wheel number
+    return [
+      eval('wheelLetters' + wheelNumber),
+      eval('wheelLetters' + wheelNumber).length,
+      eval('wheelLetters' + wheelNumber).indexOf(this['letter'+ wheelNumber]),
+    ];
+  }
+
+  /**
   * Function for the Down arrow buttons. This will spin the respective
   * wheel one alphabet down
   */
-  onArrowClickDown (wheelNumber) {
+  onArrowClickDown(wheelNumber) {
     /**
     * Call this function to restart timer to monitor inactivity
     * Also to play sound to indicate the arrow button is touched
@@ -488,64 +496,24 @@ export default class workshop_spin_wheels_1 extends Component {
     */
     this.clearTimeSound();
 
-    // Get set of letters for each wheel from JSON
-    let wl = require('./json/wordListUtil.js');
-    let wheelLetters1 = wl.wheelLetters1;
-    let wheelLetters2 = wl.wheelLetters2;
-    let wheelLetters3 = wl.wheelLetters3;
-
-    let wheel = eval('wheelLetters' + wheelNumber);
-    let wheelLength = wheel.length;
-    let currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
+    // Get information for specific wheel
+    let wheelData = this.getLettersInWheels(wheelNumber);
+    let wheel = wheelData[0];
+    let wheelLength = wheelData[1];
+    let currentIndexInWheel = wheelData[2];
 
     if (currentIndexInWheel < (wheelLength - 1)) {
-      if (wheelNumber === 1) {
-        letter1 = wheel[currentIndexInWheel + 1];
+      this['letter' + wheelNumber] = wheel[currentIndexInWheel + 1];
 
-        // export to letterSprite.js for use to stop animation
-        exports.letter1 = letter1;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else if (wheelNumber === 2) {
-        letter2 = wheel[currentIndexInWheel + 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter2 = letter2;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else {
-        letter3 = wheel[currentIndexInWheel + 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter3 = letter3;
-        this.stopIndividualWheels(wheelNumber);
-
-      }
-
+      // export to letterSprite.js for use to stop animation
+      exports['letter' + wheelNumber] = this['letter' + wheelNumber];
+      this.stopIndividualWheels(wheelNumber);
     } else {
+      this['letter' + wheelNumber] = wheel[0];
 
-      if (wheelNumber === 1) {
-        letter1 = wheel[0];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter1 = letter1;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else if (wheelNumber === 2) {
-        letter2 = wheel[0];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter2 = letter2;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else {
-        letter3 = wheel[0];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter3 = letter3;
-        this.stopIndividualWheels(wheelNumber);
-
-      }
+      // export to letterSprite.js for use to stop animation
+      exports['letter' + wheelNumber] = this['letter' + wheelNumber];
+      this.stopIndividualWheels(wheelNumber);
     }
   }
 
@@ -561,63 +529,24 @@ export default class workshop_spin_wheels_1 extends Component {
     */
     this.clearTimeSound();
 
-    // Get set of letters for each wheel from JSON
-    let wl = require('./json/wordListUtil.js');
-    let wheelLetters1 = wl.wheelLetters1;
-    let wheelLetters2 = wl.wheelLetters2;
-    let wheelLetters3 = wl.wheelLetters3;
-
-    let wheel = eval('wheelLetters' + wheelNumber);
-    let wheelLength = wheel.length;
-    let currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
+    // Get information for specific wheel
+    let wheelData = this.getLettersInWheels(wheelNumber);
+    let wheel = wheelData[0];
+    let wheelLength = wheelData[1];
+    let currentIndexInWheel = wheelData[2];
 
     if (currentIndexInWheel > 0) {
-      if (wheelNumber === 1) {
-        letter1 = wheel[currentIndexInWheel - 1];
+      this['letter' + wheelNumber] = wheel[currentIndexInWheel - 1];
 
-        // export to letterSprite.js for use to stop animation
-        exports.letter1 = letter1;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else if (wheelNumber === 2) {
-        letter2 = wheel[currentIndexInWheel - 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter2 = letter2;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else {
-        letter3 = wheel[currentIndexInWheel - 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter3 = letter3;
-        this.stopIndividualWheels(wheelNumber);
-
-      }
-
+      // export to letterSprite.js for use to stop animation
+      exports['letter' + wheelNumber] = this['letter' + wheelNumber];
+      this.stopIndividualWheels(wheelNumber);
     } else {
-      if (wheelNumber === 1) {
-        letter1 = wheel[wheelLength - 1];
+      this['letter' + wheelNumber] = wheel[wheelLength - 1];
 
-        // export to letterSprite.js for use to stop animation
-        exports.letter1 = letter1;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else if (wheelNumber === 2) {
-        letter2 = wheel[wheelLength - 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter2 = letter2;
-        this.stopIndividualWheels(wheelNumber);
-
-      } else {
-        letter3 = wheel[wheelLength - 1];
-
-        // export to letterSprite.js for use to stop animation
-        exports.letter3 = letter3;
-        this.stopIndividualWheels(wheelNumber);
-
-      }
+      // export to letterSprite.js for use to stop animation
+      exports['letter' + wheelNumber] = this['letter' + wheelNumber];
+      this.stopIndividualWheels(wheelNumber);
     }
   }
 
@@ -640,7 +569,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   // Function to spin the text in spin button at every 12 second interval
-  startInactivityMonitorNoArrows () {
+  startInactivityMonitorNoArrows() {
     this.intervalGetUser = TimerMixin.setInterval ( () => {
       this.spinButtonText();
     }, inactivityTimeOut);
@@ -650,7 +579,7 @@ export default class workshop_spin_wheels_1 extends Component {
   * Function to spin the text in spin button at every 12 second interval
   * and spring the arrow buttons
   */
-  startInactivityMonitorWithArrows () {
+  startInactivityMonitorWithArrows() {
     this.intervalGetUser2 = TimerMixin.setInterval ( () => {
       this.spinButtonText();
       this.springArrows();
@@ -678,7 +607,7 @@ export default class workshop_spin_wheels_1 extends Component {
   */
 
   // Function to play an audio of the word formed by the wheels
-  onSpinButtonPress () {
+  onSpinButtonPress() {
     // Stop and release previous sound
     this.whoosh.stop();
     this.whoosh.release();
