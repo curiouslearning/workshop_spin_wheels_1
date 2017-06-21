@@ -1,4 +1,4 @@
-const wordImages = {
+const WordImages = {
   cam: require('../images/cam.jpg'),
   can: require('../images/can.jpg'),
   cap: require('../images/cap.jpg'),
@@ -36,4 +36,4 @@ const wordImages = {
   unknown: require('../images/unknown.jpg'),
 }
 
-export default wordImages;
+export default WordImages;

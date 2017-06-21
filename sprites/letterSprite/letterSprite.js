@@ -35,25 +35,30 @@ const letterSprite = {
     const consonants =  [1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25];
     const vowels = [0,4,8,14,20];
 
-    var nw = require('../../index.android.js');
-    var letter1 = nw.letter1;
-    var letter2 = nw.letter2;
-    var letter3 = nw.letter3;
-    var wl = require('../../json/wordListUtil.js');
-    var wheelLetters1 = wl.wheelLetters1;
-    var wheelLetters2 = wl.wheelLetters2;
-    var wheelLetters3 = wl.wheelLetters3;
-    var wheel1 = [];
-    var wheel2 = [];
-    var wheel3 = [];
+    let nw = require('../../index.android.js');
+    let letter1 = nw.letter1;
+    let letter2 = nw.letter2;
+    let letter3 = nw.letter3;
+    
+    /*
+    let wl = require('../../json/wordListUtil.js');
+    let wheelLetters1 = wl.wheelLetters1;
+    let wheelLetters2 = wl.wheelLetters2;
+    let wheelLetters3 = wl.wheelLetters3;
+    let wheel1 = [];
+    let wheel2 = [];
+    let wheel3 = [];
+    */
 
+    /*
     function getWheelLetters(wheelNumber) {
-      var wheelLength = (eval("wheelLetters" + 1)).length;
+      let wheelLength = (eval("wheelLetters" + 1)).length;
       for (i=0; i<wheelLength; i++) {
         (eval('wheel'+ 1)).push(alphabetList.indexOf((eval("wheelLetters" + 1))[i]));
       }
       return eval('wheel' + 1);
     }
+    */
 
     switch (animationType) {
       case 'IDLELETTER1':

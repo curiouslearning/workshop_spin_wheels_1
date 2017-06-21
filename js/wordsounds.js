@@ -1,4 +1,11 @@
-const wordSounds = {
+/**
+* This file is not really being used by the app.
+* It is place here to inform:
+* 1. Location of actual sound files
+* 2. File name of sound file must be the same of file name of image file
+* For example, cam.png must have a corresponding cam.wav
+*/
+const WordSounds = {
   cam: require('../android/app/src/main/res/raw/cam.wav'),
   can: require('../android/app/src/main/res/raw/can.wav'),
   cap: require('../android/app/src/main/res/raw/cap.wav'),
@@ -42,4 +49,4 @@ const wordSounds = {
   boink: require('../android/app/src/main/res/raw/boink.wav'),
 }
 
-export default wordSounds;
+export default WordSounds;

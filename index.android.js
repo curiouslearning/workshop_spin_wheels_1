@@ -30,8 +30,8 @@ import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import Sound from 'react-native-sound';
 import letterSprite from './sprites/letterSprite/letterSprite';
 import wordListUtil from './json/wordListUtil';
-import wordImages from './js/wordimages';
-import wordSounds from './js/wordsounds';
+import WordImages from './js/WordImages';
+//import WordSounds from './js/WordSounds';
 import styles from './style/styles';
 
 const baseWidth = 1024;
@@ -50,9 +50,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.state = {
       cells: [],
       imageOpacity: 0.3,                          // clear image of word
-      buttonImageC1Opacity: 0,                  // arrow buttons of column 1 are grayed out (opacity originally at 0.3)
-      buttonImageC2Opacity: 0,                  // arrow buttons of column 2 are grayed out (opacity originally at 0.3)
-      buttonImageC3Opacity: 0,                  // arrow buttons of column 3 are grayed out (opacity originally at 0.3)
+      buttonImageC1Opacity: 0,                    // arrow buttons of column 1 are grayed out (opacity originally at 0.3)
+      buttonImageC2Opacity: 0,                    // arrow buttons of column 2 are grayed out (opacity originally at 0.3)
+      buttonImageC3Opacity: 0,                    // arrow buttons of column 3 are grayed out (opacity originally at 0.3)
       buttonDisabled: true,                       // arrow and image buttons are touch-disabled
       spinButtonDisabled: false,                  // spin button is active
       spinButtonBackgroundColor: 'royalblue',     // background color of the spin button
@@ -69,7 +69,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.animationKeys = ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3'];
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
     this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
-    this.scale = {image: 1};
+    this.scale = { image: 1 };
 
     // Checking pixel ratio of device to determine the scale of cell sprite
     if (PixelRatio.get() <= 2) {
@@ -85,32 +85,31 @@ export default class workshop_spin_wheels_1 extends Component {
     this.wellDoneSound = new Sound('welldone.wav', Sound.MAIN_BUNDLE);
     this.arrowClickSound = new Sound('lever_switch.mp3', Sound.MAIN_BUNDLE);
     this.whoosh = new Sound('machine_reverse.mp3', Sound.MAIN_BUNDLE);
-    this.spinValue = new Animated.Value(1);
-    this.arrowSpringValue = new Animated.Value(1);
-    this.targetWord = 'unknown';              // set initial target word to unknown.jpg
-    this.wordsCompleted = 0;                  // for tracking number of words formed from word list
-    this.wordsShown = [];                     // for tracking what words were formed by wheels
-    this.wordListLevel = 0;                   // word list level from JSON; start with level 0
-    this.timeoutId = '';                      // id of timeout used in stopIndividualWheels & clearTimeSound functions
-    this.containerLeftWidth = screenWidth/2;  // temporarily set the width of left container to half of screen width
+    this.spinValue = new Animated.Value(1);           // for text on spin button animation during inactivity
+    this.arrowSpringValue = new Animated.Value(1);    // for arrow buttons animation during inactivity
+    this.targetWord = 'unknown';                      // set initial target word to unknown.jpg
+    this.wordsCompleted = 0;                          // for tracking number of words formed from word list
+    this.wordsShown = [];                             // for tracking what words were formed by wheels
+    this.wordListLevel = 0;                           // word list level from JSON; start with level 0
+    this.timeoutId = '';                              // id of timeout used in stopIndividualWheels & clearTimeSound functions
+    this.containerLeftWidth = screenWidth/2;          // temporarily set the width of left container to half of screen width
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
 
-    var letter1;            // first letter of target word
-    var letter2;            // second letter of target word
-    var letter3;            // third letter of target word
-    var targetSound;        // the sound file of the target word
+    let letter1;            // first letter of target word
+    let letter2;            // second letter of target word
+    let letter3;            // third letter of target word
+    let targetSound;        // the sound file of the target word
 
     console.log("screenWidth: " + screenWidth);
     console.log("screenHeight: " + screenHeight);
     console.log("pixelRatio: " + PixelRatio.get());
-
   }
 
   componentWillMount () {
       this.setState({cells: this.createCellObjsArray()});
-      this.setState( () => this.startInactivityMonitor());
+      this.setState( () => this.startInactivityMonitorNoArrows());
   }
 
   componentDidMount () {
@@ -152,7 +151,7 @@ export default class workshop_spin_wheels_1 extends Component {
     const height = this.numRows * size.height * this.cellSpriteScale;
     const top = 0.1 * screenHeight/5;
     const left = (this.containerLeftWidth/2) - (width/2);
-    const location = {top, left};
+    const location = { top, left };
     return location;
   }
 
@@ -160,14 +159,17 @@ export default class workshop_spin_wheels_1 extends Component {
     const size = letterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
-    return {width, height};
+    return { width, height };
   }
 
-  // Function to set width and height of image of word
-  // This is to allow app to respond to different tablet and phone sizes
+  /**
+  * Function to set width and height of image of word
+  * This is to allow app to respond to different tablet and phone sizes
+  */
   setImageWidthHeight () {
     // Get the dimension of the next image file
-    let source = resolveAssetSource(wordImages[this.targetWord]);
+    let source = resolveAssetSource(WordImages[this.targetWord]);
+
     // Check if image needs to be resized based on device width
     if (screenWidthScale > 1) {
       this.setState({
@@ -187,18 +189,21 @@ export default class workshop_spin_wheels_1 extends Component {
     }
   }
 
-  // Function called by Spin Button to spin the wheels
-  // A word from the target word list will be selected
-  // via the nextWord() function
+  /**
+  * Function called by Spin Button to spin the wheels
+  * A word from the target word list will be selected
+  * via the nextWord() function
+  */
   cellPressed (cellObj, position) {
-    // Check if spinButtonBackgroundColor is gray (when wheels are spinning)
-    // If yes, play the 'cannotSpinSound' sound
-    // If no, proceed with spinning the wheels
-    if (this.state.spinButtonBackgroundColor == 'gray') {
+    /**
+    * Check if spinButtonBackgroundColor is gray (when wheels are spinning)
+    * If yes, play the 'cannotSpinSound' sound
+    * If no, proceed with spinning the wheels
+    */
+    if (this.state.spinButtonBackgroundColor === 'gray') {
       this.cannotSpinSound.setVolume(0.10);
       this.cannotSpinSound.play();
     } else {
-
       const cells = _.cloneDeep(this.state.cells);
 
       // Set states for images and buttons after the spin button is pressed
@@ -214,19 +219,16 @@ export default class workshop_spin_wheels_1 extends Component {
       cells[0].animationKey = 'SPINLETTER1';
       cells[1].animationKey = 'SPINLETTER2';
       cells[2].animationKey = 'SPINLETTER3';
-
       cells[0].loopAnimation = true;
-      cells[0].uid = randomstring({length: 7});
+      cells[0].uid = randomstring({ length: 7 });
       cells[1].loopAnimation = true;
-      cells[1].uid = randomstring({length: 7});
+      cells[1].uid = randomstring({ length: 7 });
       cells[2].loopAnimation = true;
-      cells[2].uid = randomstring({length: 7});
-
-      this.setState({cells});
+      cells[2].uid = randomstring({ length: 7 });
+      this.setState({ cells });
 
       // Call stopWheels function to stop all 3 wheels together
       this.stopWheels();
-
     }
   }
 
@@ -235,7 +237,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.targetWord = this.targetWordList[Math.floor(Math.random() * this.targetWordList.length)];
 
     // Split the target word into individual letters
-    var targetWordArray = this.targetWord.split("");
+    let targetWordArray = this.targetWord.split("");
     letter1 = targetWordArray[0];
     letter2 = targetWordArray[1];
     letter3 = targetWordArray[2];
@@ -249,34 +251,29 @@ export default class workshop_spin_wheels_1 extends Component {
     exports.letter3 = letter3;
   }
 
-  // This function is called to stop the wheels from spinning
-  // The word created by the wheels will be checked against the
-  // target word list via the checkWord function
+  /**
+  * This function is called to stop the wheels from spinning
+  * The word created by the wheels will be checked against the
+  * target word list via the checkWord function
+  */
   stopWheels() {
     const cells = _.cloneDeep(this.state.cells);
-    this.setState({buttonDisabled: true});          //disable all arrow and image buttons
+    this.setState({ buttonDisabled: true });          //disable all arrow and image buttons
 
     // Stop the wheels from spinning
-    var timeoutId = TimerMixin.setTimeout( () => {
+    let timeoutId = TimerMixin.setTimeout( () => {
       cells[0].animationKey = 'STOPLETTER1';
       cells[1].animationKey = 'STOPLETTER2';
       cells[2].animationKey = 'STOPLETTER3';
-
       cells[0].loopAnimation = true;
-      cells[0].uid = randomstring({length: 7});
+      cells[0].uid = randomstring({ length: 7 });
       cells[1].loopAnimation = true;
-      cells[1].uid = randomstring({length: 7});
+      cells[1].uid = randomstring({ length: 7 });
       cells[2].loopAnimation = true;
-      cells[2].uid = randomstring({length: 7});
-
+      cells[2].uid = randomstring({ length: 7 });
       this.setState({cells});
 
       // Stop and release the wheel spinning and cannotSpinSound sounds
-      //this.wheelsSound.stop();
-      //this.wheelsSound.release();
-      //this.cannotSpinSound.stop();
-      //this.cannotSpinSound.release();
-
       this.wheelsSound.stop( () => {
         this.wheelsSound.release();
       });
@@ -290,71 +287,62 @@ export default class workshop_spin_wheels_1 extends Component {
       // Call checkWord function to check the word formed by the wheels
       this.checkWord(letter1, letter2, letter3);
 
-      this.startInactivityMonitor2();
+      this.startInactivityMonitorWithArrows();
     }, 2500);
-
   }
 
-  // Function to stop the wheels individually. This function
-  // is called by the Up and Down arrows. The word created by the
-  // three wheels will be checked against the target word list via
-  // the checkWord function
+  /**
+  * Function to stop the wheels individually. This function
+  * is called by the Up and Down arrows. The word created by the
+  * three wheels will be checked against the target word list via
+  * the checkWord function
+  */
   stopIndividualWheels (wheelNumber) {
-
     const cells = _.cloneDeep(this.state.cells);
 
     // Stop the individual wheel
     cells[wheelNumber - 1].animationKey = 'STOPLETTER' + wheelNumber;
     cells[wheelNumber - 1].loopAnimation = true;
-    cells[wheelNumber - 1].uid = randomstring({length: 7});
-
-    this.setState({cells});
+    cells[wheelNumber - 1].uid = randomstring({ length: 7 });
+    this.setState({ cells });
 
     // Check if word formed is in current target word list
     this.checkWord(letter1, letter2, letter3);
+
     // Spin the text in spin button after 12 seconds of inactivity
     this.timeoutId = TimerMixin.setTimeout( () => {
-      this.startInactivityMonitor2();
+      this.startInactivityMonitorWithArrows();
     }, 2500);
 
     console.log('stopIndWheels (letter1): ' + letter1);
     console.log('stopIndWheels (letter2): ' + letter2);
     console.log('stopIndWheels (letter3): ' + letter3);
     console.log('wordListLevel: ' + this.wordListLevel);
-
   }
 
-  // Function to check if the word created by the wheels are in the
-  // target word list. If yes, the image will show and the audio will play
+  /**
+  * Function to check if the word created by the wheels are in the
+  * target word list. If yes, the image will show and the audio will play
+  */
   checkWord(l1, l2, l3) {
-    var newWord = l1 + l2 + l3;
+    let newWord = l1 + l2 + l3;
 
     // Check if word formed by wheels is in target word list
-    var newWordInList = (this.targetWordList.indexOf(newWord) > -1);
+    let newWordInList = (this.targetWordList.indexOf(newWord) > -1);
     console.log('New Word: ' + newWord);
     console.log('Is word in List: ' + newWordInList);
 
-    if (newWordInList == true) {
-
-      // Check to see if spin button or arrow button was pressed
-      // 'gray' means spin button was pressed
-      if (this.state.spinButtonBackgroundColor == 'gray') {
+    if (newWordInList === true) {
+      /**
+      * Check to see if spin button or arrow button was pressed.
+      * 'gray' means spin button was pressed and so need to
+      * set stop wheel states; otherwise, nothing needs to be
+      * done as UI is in stop wheel states already
+      */
+      if (this.state.spinButtonBackgroundColor === 'gray') {
         this.onStopWheelsSetState();
-      } else {
-          //this.onSpinButtonPressSetState ();
-          //this.showArrowButtons();
-          //this.onStopWheelsSetState();
-          console.log('SPIN Button is blue!');
       }
-
-      // Check if the word was not shown before
-      if ((this.wordsShown.indexOf(newWord) > -1) == false) {
-        this.wordsShown.push(newWord);
-        this.wordsCompleted = this.wordsCompleted + 1;
-        // Check percent of word list shown; if >= 50% shown, advance to next level
-        this.checkPercentComplete();
-      }
-
+      
       this.targetWord = newWord;
       targetSound = newWord + '.wav';
 
@@ -364,39 +352,51 @@ export default class workshop_spin_wheels_1 extends Component {
       // Play the audio file of the word
       this.onSpinButtonPress();
 
+      // Check if the word was not shown before
+      if ((this.wordsShown.indexOf(newWord) > -1) === false) {
+        this.wordsShown.push(newWord);
+        this.wordsCompleted = this.wordsCompleted + 1;
+
+        // Check percent of word list shown; if >= 50% shown, advance to next level
+        this.checkPercentComplete();
+      }
+
     } else {
       // If word not in word list, shows an 'unknown' image
       this.targetWord = 'unknown';
+
       // Play the following file when user touched the wheels and 'unknown' image
       targetSound = 'machine_reverse.mp3';
 
       // Call function to set width and height of image of word
       this.setImageWidthHeight();
 
-      this.setState({imageOpacity: 1});
-
+      this.setState({ imageOpacity: 1 });
     }
-
   }
 
-  // Function to check percent of words completed from selected target word list
-  // If >= 50% of word list formed, advance to next level of word list
+  /**
+  * Function to check percent of words completed from selected target word list
+  * If >= 50% of word list formed, advance to next level of word list
+  */
   checkPercentComplete() {
-    var wordListLength = this.targetWordList.length;
-    var percentCompleted = (this.wordsCompleted/wordListLength) * 100;
+    let wordListLength = this.targetWordList.length;
+    let percentCompleted = (this.wordsCompleted/wordListLength) * 100;
 
     console.log('Words completed: ' + this.wordsCompleted);
     console.log('Total words in list: ' + wordListLength);
     console.log('Percent completed: ' + percentCompleted);
     console.log('wordsShown[]: ' + this.wordsShown);
 
-    // Checks if 50% of word list has been formed
-    // If yes, word list is changed to the next level
-    // Once the last level is reached, game will remain at that level
+    /**
+    * Checks if 50% of word list has been formed
+    * If yes, word list is changed to the next level
+    * Once the last level is reached, game will remain at that level
+    */
     if (percentCompleted >= this.state.percentCompleteGoal) {
-
       // Get number of word list available in JSON file
-      var jsonLength = wordListUtil.getJsonLength();
+      let jsonLength = wordListUtil.getJsonLength();
+
       if (this.wordListLevel < (jsonLength - 1)) {
         this.wordListLevel = this.wordListLevel + 1;
         console.log('wordlistlevel: ' + this.wordListLevel);
@@ -457,12 +457,12 @@ export default class workshop_spin_wheels_1 extends Component {
   // Set the state of buttons and images when the wheels stop spinning
   onStopWheelsSetState() {
     // Show the image of the word first
-    var timeoutId = TimerMixin.setTimeout( () => {
-      this.setState({imageOpacity: 1});
+    let timeoutId = TimerMixin.setTimeout( () => {
+      this.setState({ imageOpacity: 1 });
     }, 100);
 
     // Set the following states after 2.5 seconds to allow audio file to play completely
-    var timeoutId2 = TimerMixin.setTimeout( () => {
+    let timeoutId2 = TimerMixin.setTimeout( () => {
       this.setState({
         buttonDisabled: false,                   // Enable the arrow buttons
         spinButtonDisabled: false,               // Enable the spin button
@@ -476,221 +476,214 @@ export default class workshop_spin_wheels_1 extends Component {
     }, 4000);
   }
 
-  // Function for the Down arrow buttons. This will spin the respective
-  // wheel one alphabet down
+  /**
+  * Function for the Down arrow buttons. This will spin the respective
+  * wheel one alphabet down
+  */
   onArrowClickDown (wheelNumber) {
-    // Call this function to restart timer to monitor inactivity
-    // Also to play sound to indicate the arrow button is touched
-    // And stop audio if audio of word is played
+    /**
+    * Call this function to restart timer to monitor inactivity
+    * Also to play sound to indicate the arrow button is touched
+    * And stop audio if audio of word is played
+    */
     this.clearTimeSound();
 
     // Get set of letters for each wheel from JSON
-    var wl = require('./json/wordListUtil.js');
-    var wheelLetters1 = wl.wheelLetters1;
-    var wheelLetters2 = wl.wheelLetters2;
-    var wheelLetters3 = wl.wheelLetters3;
+    let wl = require('./json/wordListUtil.js');
+    let wheelLetters1 = wl.wheelLetters1;
+    let wheelLetters2 = wl.wheelLetters2;
+    let wheelLetters3 = wl.wheelLetters3;
 
-    var wheel = eval('wheelLetters' + wheelNumber);
-    var wheelLength = wheel.length;
-    var currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
+    let wheel = eval('wheelLetters' + wheelNumber);
+    let wheelLength = wheel.length;
+    let currentIndexInWheel = wheel.indexOf(eval('letter'+ wheelNumber));
 
     if (currentIndexInWheel < (wheelLength - 1)) {
-      if (wheelNumber == 1) {
+      if (wheelNumber === 1) {
         letter1 = wheel[currentIndexInWheel + 1];
-        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter1 = letter1;
         this.stopIndividualWheels(wheelNumber);
 
-      } else if (wheelNumber == 2) {
+      } else if (wheelNumber === 2) {
         letter2 = wheel[currentIndexInWheel + 1];
-        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter2 = letter2;
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[currentIndexInWheel + 1];
-        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter3 = letter3;
         this.stopIndividualWheels(wheelNumber);
 
       }
 
     } else {
 
-      if (wheelNumber == 1) {
+      if (wheelNumber === 1) {
         letter1 = wheel[0];
-        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter1 = letter1;
         this.stopIndividualWheels(wheelNumber);
 
-      } else if (wheelNumber == 2) {
+      } else if (wheelNumber === 2) {
         letter2 = wheel[0];
-        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter2 = letter2;
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[0];
-        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter3 = letter3;
         this.stopIndividualWheels(wheelNumber);
 
       }
     }
-
   }
 
-  // Function for the Down arrow buttons. This will spin the respective
-  // wheel one alphabet up
+  /**
+  * Function for the Down arrow buttons. This will spin the respective
+  * wheel one alphabet up
+  */
   onArrowClickUp(wheelNumber) {
-    // Call this function to restart timer to monitor inactivity
-    // Also to play sound to indicate the arrow button is touched
-    // And stop audio if audio of word is played
+    /**
+    * Call this function to restart timer to monitor inactivity
+    * Also to play sound to indicate the arrow button is touched
+    * And stop audio if audio of word is played
+    */
     this.clearTimeSound();
 
     // Get set of letters for each wheel from JSON
-    var wl = require('./json/wordListUtil.js');
-    var wheelLetters1 = wl.wheelLetters1;
-    var wheelLetters2 = wl.wheelLetters2;
-    var wheelLetters3 = wl.wheelLetters3;
+    let wl = require('./json/wordListUtil.js');
+    let wheelLetters1 = wl.wheelLetters1;
+    let wheelLetters2 = wl.wheelLetters2;
+    let wheelLetters3 = wl.wheelLetters3;
 
-    var wheel = eval('wheelLetters' + wheelNumber);
-    var wheelLength = wheel.length;
-    var currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
+    let wheel = eval('wheelLetters' + wheelNumber);
+    let wheelLength = wheel.length;
+    let currentIndexInWheel = wheel.indexOf(eval('letter' + wheelNumber));
 
     if (currentIndexInWheel > 0) {
-      if (wheelNumber == 1) {
+      if (wheelNumber === 1) {
         letter1 = wheel[currentIndexInWheel - 1];
-        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter1 = letter1;
         this.stopIndividualWheels(wheelNumber);
 
-      } else if (wheelNumber == 2) {
+      } else if (wheelNumber === 2) {
         letter2 = wheel[currentIndexInWheel - 1];
-        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter2 = letter2;
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[currentIndexInWheel - 1];
-        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter3 = letter3;
         this.stopIndividualWheels(wheelNumber);
 
       }
 
     } else {
-      if (wheelNumber == 1) {
+      if (wheelNumber === 1) {
         letter1 = wheel[wheelLength - 1];
-        exports.letter1 = letter1;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter1 = letter1;
         this.stopIndividualWheels(wheelNumber);
 
-      } else if (wheelNumber == 2) {
+      } else if (wheelNumber === 2) {
         letter2 = wheel[wheelLength - 1];
-        exports.letter2 = letter2;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter2 = letter2;
         this.stopIndividualWheels(wheelNumber);
 
       } else {
         letter3 = wheel[wheelLength - 1];
-        exports.letter3 = letter3;   // export to letterSprite.js for use to stop animation
+
+        // export to letterSprite.js for use to stop animation
+        exports.letter3 = letter3;
         this.stopIndividualWheels(wheelNumber);
 
       }
     }
-
   }
 
-  // Call this function to restart timer to monitor inactivity
-  // Also to play sound to indicate the arrow button is touched
-  // And stop audio if audio of word is played
-  // Function is used after every arrow button is touched
+  /**
+  * Call this function to restart timer to monitor inactivity
+  * Also to play sound to indicate the arrow button is touched
+  * And stop audio if audio of word is played
+  * Function is used after every arrow button is touched
+  */
   clearTimeSound() {
     // Restart timer for monitoring inactivity
     TimerMixin.clearTimeout(this.timeoutId);
+
     // Play sound to indicate that arrow is touched
     this.arrowClickSound.play();
 
-    // If audio of word is being played
-    // Stop audio and release resource
+    // If audio of word is being played, stop audio and release resource
     this.whoosh.stop();
     this.whoosh.release();
-    /*
-    if(this.whoosh) {
-        this.whoosh.stop( () => {
-          this.whoosh.release();
-        });
-    }
-    */
   }
 
   // Function to spin the text in spin button at every 12 second interval
-  startInactivityMonitor () {
+  startInactivityMonitorNoArrows () {
     this.intervalGetUser = TimerMixin.setInterval ( () => {
       this.spinButtonText();
     }, inactivityTimeOut);
   }
 
-  // Function to spin the text in spin button at every 12 second interval
-  // and spring the arrow buttons
-  startInactivityMonitor2 () {
+  /**
+  * Function to spin the text in spin button at every 12 second interval
+  * and spring the arrow buttons
+  */
+  startInactivityMonitorWithArrows () {
     this.intervalGetUser2 = TimerMixin.setInterval ( () => {
       this.spinButtonText();
       this.springArrows();
     }, inactivityTimeOut);
   }
 
-  // Function to spin the text in spin button at every 12 second interval
-  // and spring the arrow buttons
-  startInactivityMonitor3 () {
-    this.intervalGetUser3 = TimerMixin.setInterval ( () => {
-      this.spinButtonText();
-      this.springArrows();
-    }, inactivityTimeOut);
-  }
-
-  // Animation to spin the text in the spin button
-  spinButtonText() {
-    this.spinValue.setValue(0);
-    Animated.timing(
-      this.spinValue,
-      {
-        toValue: 1,
-        duration: 3000,
-        easing: Easing.elastic(4),
-      }
-    ).start();
-  }
-
-  // Animation to spin the arrow buttons
-  springArrows() {
-    this.arrowSpringValue.setValue(0.3);
-    Animated.spring(
-      this.arrowSpringValue,
-      {
-        toValue: 1,
-        friction: 1,
-        tension: 2
-      }
-    ).start();
-  }
-
-  // Function to show (but still slightly gray out) the Up/Down arrows column by column
+  /**
+  * Function to show (but still slightly gray out) the Up/Down arrows
+  * column by column. Currently un-used
+  */
+  /*
   showArrowButtons() {
-
-    var timeoutId = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC1Opacity: 0.7});
+    let timeoutId = TimerMixin.setTimeout ( () => {
+      this.setState({ buttonImageC1Opacity: 0.7 });
     }, 500);
 
-    var timeoutId2 = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC2Opacity: 0.7});
+    let timeoutId2 = TimerMixin.setTimeout ( () => {
+      this.setState({ buttonImageC2Opacity: 0.7 });
     }, 1000);
 
-    var timeoutId3 = TimerMixin.setTimeout ( () => {
-      this.setState({buttonImageC3Opacity: 0.7});
+    let timeoutId3 = TimerMixin.setTimeout ( () => {
+      this.setState({ buttonImageC3Opacity: 0.7 });
     }, 1500);
-
   }
+  */
 
   // Function to play an audio of the word formed by the wheels
   onSpinButtonPress () {
-
     // Stop and release previous sound
     this.whoosh.stop();
     this.whoosh.release();
 
     // Load the sound file variable, targetSound
-    //whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
     this.whoosh = new Sound(targetSound, Sound.MAIN_BUNDLE, (error) => {
       console.log('targetSound: ' + targetSound);
 
@@ -703,13 +696,11 @@ export default class workshop_spin_wheels_1 extends Component {
           if (success) {
             this.whoosh.release();
             console.log('successfully finished playing');
-            //console.log('Duration in seconds: ' + whoosh.getDuration() + 'Number of channels: ' + whoosh.getNumberOfChannels())
           } else {
             console.log('playback failed due to audio decoding errors');
           }
         });
       }
-
     });
 
     // Reduce the volume by half
@@ -744,27 +735,53 @@ export default class workshop_spin_wheels_1 extends Component {
 
     // Release the audio player resource
     this.whoosh.release();
-
   }
 
-  // Function to measure the width of the left container
-  // This function is called by View holding the AnimatedSpriteMatrix
-  // Width value is needed to help set the location of wheels
-  // This is done so that app can be used in tablets and phones
+  /**
+  * Function to measure the width of the left container
+  * This function is called by View holding the AnimatedSpriteMatrix
+  * Width value is needed to help set the location of wheels
+  * This is done so that app can be used in tablets and phones
+  */
   onLayout = event => {
     if (this.state.containerLeftDimensions)
-      return
-    let {width, height} = event.nativeEvent.layout
-    this.setState({ containerLeftDimensions: {width, height}})
+      return;
+    let {width, height} = event.nativeEvent.layout;
+    this.setState({ containerLeftDimensions: { width, height } });
     this.containerLeftWidth = width;
   }
 
-  render() {
+  // Animation to spin the text in the spin button
+  spinButtonText() {
+    this.spinValue.setValue(0);
+    Animated.timing(
+      this.spinValue,
+      {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.elastic(4),
+      }
+    ).start();
+  }
 
+  // Animation to spin the arrow buttons
+  springArrows() {
+    this.arrowSpringValue.setValue(0.3);
+    Animated.spring(
+      this.arrowSpringValue,
+      {
+        toValue: 1,
+        friction: 1,
+        tension: 2
+      }
+    ).start();
+  }
+
+  render() {
     // Save the width and height of left container
     if (this.state.containerLeftDimensions) {
-      var { containerLeftDimensions } = this.state
-      var { width, height } = containerLeftDimensions
+      let { containerLeftDimensions } = this.state
+      let { width, height } = containerLeftDimensions
       console.log('containerLeft Width: ' + width);
       console.log('containerLeft Height: ' + height);
     }
@@ -776,71 +793,80 @@ export default class workshop_spin_wheels_1 extends Component {
     });
 
     return (
-      <View style={styles.container}>
-        <View style={styles.containerLeft}>
-          <View style={styles.componentsContainer}>
+      <View style={ styles.container }>
+        <View style={ styles.containerLeft }>
+          <View style={ styles.componentsContainer }>
 
-            <View style={styles.upArrowsRow}>
+            <View style={ styles.upArrowsRow }>
 
               <TouchableOpacity
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickUp(1)}
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickUp(1) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC1Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_up.png')}
+                  style={
+                    [styles.imageArrowUpHolder,
+                      { opacity: this.state.buttonImageC1Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_up.png') }
                 />
 
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickUp(2)}
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickUp(2) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC2Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_up.png')}
+                  style={
+                    [styles.imageArrowUpHolder,
+                      { opacity: this.state.buttonImageC2Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_up.png') }
                 />
 
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickUp(3)}
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickUp(3) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowUpHolder, {opacity: this.state.buttonImageC3Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_up.png')}
+                  style={
+                    [styles.imageArrowUpHolder,
+                      { opacity: this.state.buttonImageC3Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_up.png') }
                 />
 
               </TouchableOpacity>
 
             </View>
 
-            <View style={styles.wheelsRow}
-              pointerEvents={this.state.animatedMatrixPointerEvents}
-              onLayout={this.onLayout}>
+            <View style={ styles.wheelsRow }
+              pointerEvents={ this.state.animatedMatrixPointerEvents }
+              onLayout={ this.onLayout }>
 
               <AnimatedSpriteMatrix
                 styles={{
@@ -849,88 +875,101 @@ export default class workshop_spin_wheels_1 extends Component {
                     position: 'absolute',
                     opacity: this.state.animatedSpriteMatrixOpacity,
                   }}
-                dimensions={{columns: this.numColumns, rows: this.numRows}}
-                cellSpriteScale={this.cellSpriteScale}
-                cellObjs={this.state.cells}
-                scale={this.scale}
-                onPress={() => this.onSpinButtonPress()}
-                onPressIn={ () => this.setState({animatedSpriteMatrixOpacity: 0.3}) }
-                onPressOut={ () => this.setState({animatedSpriteMatrixOpacity: 1}) }
+                dimensions={ { columns: this.numColumns, rows: this.numRows } }
+                cellSpriteScale={ this.cellSpriteScale }
+                cellObjs={ this.state.cells }
+                scale={ this.scale }
+                onPress={ () => this.onSpinButtonPress() }
+                onPressIn={ () => this.setState({ animatedSpriteMatrixOpacity: 0.3 }) }
+                onPressOut={ () => this.setState({ animatedSpriteMatrixOpacity: 1 }) }
               />
 
             </View>
 
-            <View style={styles.downArrowsRow}>
+            <View style={ styles.downArrowsRow }>
 
               <TouchableOpacity
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickDown(1)}
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickDown(1) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC1Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_down.png')}
+                  style={
+                    [styles.imageArrowDownHolder,
+                      { opacity: this.state.buttonImageC1Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_down.png') }
                 />
 
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickDown(2)}
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickDown(2) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC2Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_down.png')}
+                  style={
+                    [styles.imageArrowDownHolder,
+                      { opacity: this.state.buttonImageC2Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_down.png') }
                 />
 
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.imageContainer}
-                disabled={this.state.buttonDisabled}
-                onPress={() => this.onArrowClickDown(3)}
+                style={ styles.imageContainer }
+                disabled={ this.state.buttonDisabled }
+                onPress={ () => this.onArrowClickDown(3) }
                 >
 
                 <Animated.Image
-                  style={[styles.imageArrowDownHolder, {opacity: this.state.buttonImageC3Opacity},
-                    {
-                      transform: [
-                        {scale: this.arrowSpringValue}
-                      ]
-                    }
-                  ]}
-                  source={require('./images/yellow_border_down.png')}
+                  style={
+                    [styles.imageArrowDownHolder,
+                      { opacity: this.state.buttonImageC3Opacity },
+                      {
+                        transform: [
+                          { scale: this.arrowSpringValue }
+                        ]
+                      }
+                    ]
+                  }
+                  source={ require('./images/yellow_border_down.png') }
                 />
 
               </TouchableOpacity>
 
             </View>
 
-            <View style={styles.spinButtonRow}>
+            <View style={ styles.spinButtonRow }>
 
               <TouchableOpacity
-                disabled={this.state.spinButtonDisabled}
-                style={[styles.spinButton, {backgroundColor: this.state.spinButtonBackgroundColor}]}
-                onPress={(cellObj, position) => this.cellPressed(cellObj, 0)}
+                disabled={ this.state.spinButtonDisabled }
+                style={
+                  [styles.spinButton,
+                    { backgroundColor: this.state.spinButtonBackgroundColor }
+                  ]
+                }
+                onPress={ (cellObj, position) => this.cellPressed(cellObj, 0) }
                 >
 
-                <Animated.Text style={[styles.spinButtonText,
+                <Animated.Text style={ [styles.spinButtonText,
                   {
                     transform: [
-                      {rotate: spin}
+                      { rotate: spin }
                     ]
                   }
                 ]}>SPIN</Animated.Text>
@@ -943,15 +982,21 @@ export default class workshop_spin_wheels_1 extends Component {
 
         </View>
 
-        <View style={styles.containerRight}>
+        <View style={ styles.containerRight }>
 
           <TouchableOpacity
-            disabled={this.state.buttonDisabled}
-            onPress={() => this.onSpinButtonPress()}
+            disabled={ this.state.buttonDisabled }
+            onPress={ () => this.onSpinButtonPress() }
             >
             <Image
-              style={[styles.image , {opacity: this.state.imageOpacity}, {width: this.state.imageWidth}, {height: this.state.imageHeight}]}
-              source={wordImages[this.targetWord]}
+              style={
+                [styles.image,
+                  { opacity: this.state.imageOpacity },
+                  { width: this.state.imageWidth },
+                  { height: this.state.imageHeight }
+                ]
+              }
+              source={ WordImages[this.targetWord] }
             />
           </TouchableOpacity>
 
