@@ -117,10 +117,15 @@ export default class workshop_spin_wheels_1 extends Component {
   componentWillUnmount() {
     TimerMixin.clearInterval(this.intervalGetUser);
     TimerMixin.clearInterval(this.intervalGetUser2);
+    this.wellDoneSound.stop();
     this.wellDoneSound.release();
+    this.wheelsSound.stop();
     this.wheelsSound.release();
+    this.cannotSpinSound.stop();
     this.cannotSpinSound.release();
+    this.arrowClickSound.stop();
     this.arrowClickSound.release();
+    this.whoosh.stop();
     this.whoosh.release();
   }
 
@@ -393,17 +398,17 @@ export default class workshop_spin_wheels_1 extends Component {
         // Announce going to next level
         TimerMixin.setTimeout( () => {
           this.showAdvancingNotice();
-          this.wellDoneSound.play();
+          //this.wellDoneSound.play();
         }, 3500);
 
         // Stop and release audio resources
-        TimerMixin.setTimeout( () => {
-          this.wellDoneSound.stop( () => {
-              this.wellDoneSound.release();
-          });
-        }, 10000);
+        //TimerMixin.setTimeout( () => {
+        //  this.wellDoneSound.stop( () => {
+        //      this.wellDoneSound.release();
+        //  });
+        //}, 10000);
+
       } else {
-        //wordListLevel = 0;
         this.wordListLevel = jsonLength - 1;
         console.log('wordlistlevel: ' + this.wordListLevel);
       }
@@ -417,6 +422,16 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Dialog box to indicate advancing to next level of word list
   showAdvancingNotice() {
+    // Announce going to next level
+    this.wellDoneSound.play();
+
+    // Stop and release audio resources
+    TimerMixin.setTimeout( () => {
+      this.wellDoneSound.stop( () => {
+          this.wellDoneSound.release();
+      });
+    }, 8000);
+
     Alert.alert(
       'SPIN WHEELS GAME',
       'Well done! 50% of word list completed. Going to next level!',
@@ -497,6 +512,9 @@ export default class workshop_spin_wheels_1 extends Component {
     this.clearTimeSound();
 
     // Get information for specific wheel
+    // wheelData[0] - all the letters in the particular wheel
+    // wheelData[1] - the number of letters in the wheel
+    // wheelData[2] - the index of the current letter in the alphabet list
     let wheelData = this.getLettersInWheels(wheelNumber);
     let wheel = wheelData[0];
     let wheelLength = wheelData[1];
@@ -529,7 +547,10 @@ export default class workshop_spin_wheels_1 extends Component {
     */
     this.clearTimeSound();
 
-    // Get information for specific wheel
+    // Get information in array form for specific wheel
+    // wheelData[0] - all the letters in the particular wheel
+    // wheelData[1] - the number of letters in the wheel
+    // wheelData[2] - the index of the current letter in the alphabet list
     let wheelData = this.getLettersInWheels(wheelNumber);
     let wheel = wheelData[0];
     let wheelLength = wheelData[1];
