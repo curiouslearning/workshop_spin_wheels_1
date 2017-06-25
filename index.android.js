@@ -28,9 +28,9 @@ import randomstring from 'random-string';
 import AnimatedSprite from 'react-native-animated-sprite';
 import AnimatedSpriteMatrix from 'rn-animated-sprite-matrix';
 import Sound from 'react-native-sound';
-import letterSprite from './sprites/letterSprite/letterSprite';
-import wordListUtil from './json/wordListUtil';
+import LetterSprite from './sprites/letterSprite/LetterSprite';
 import WordImages from './js/WordImages';
+import wordListUtil from './json/wordListUtil';
 import styles from './style/styles';
 
 const baseWidth = 1024;
@@ -67,7 +67,7 @@ export default class workshop_spin_wheels_1 extends Component {
     this.activeCells = [true, true, true];
     this.animationKeys = ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3'];
     this.loopAnimation = _.fill(Array(this.activeCells.length), false);
-    this.sprites = _.fill(Array(this.activeCells.length), letterSprite);
+    this.sprites = _.fill(Array(this.activeCells.length), LetterSprite);
     this.scale = { image: 1 };
     this.numColumns = 3;
     this.numRows = 1;
@@ -110,10 +110,12 @@ export default class workshop_spin_wheels_1 extends Component {
       this.setState( () => this.startInactivityMonitorNoArrows());
   }
 
+  // Get width and height of image of word
   componentDidMount() {
     this.setImageWidthHeight();
   }
 
+  // Clear interval and stop/release audio
   componentWillUnmount() {
     TimerMixin.clearInterval(this.intervalGetUser);
     TimerMixin.clearInterval(this.intervalGetUser2);
@@ -141,7 +143,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   matrixLocation() {
-    const size = letterSprite.size;
+    const size = LetterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
     const top = 0.1 * screenHeight/5;
@@ -151,7 +153,7 @@ export default class workshop_spin_wheels_1 extends Component {
   }
 
   matrixSize() {
-    const size = letterSprite.size;
+    const size = LetterSprite.size;
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
     return { width, height };
@@ -240,7 +242,7 @@ export default class workshop_spin_wheels_1 extends Component {
     // Filename of sound file of target word
     targetSound = this.targetWord + '.wav';
 
-    // Export individual letters; to be used in letterSprite.js
+    // Export individual letters; to be used in LetterSprite.js
     exports.letter1 = this.letter1;
     exports.letter2 = this.letter2;
     exports.letter3 = this.letter3;
@@ -510,11 +512,12 @@ export default class workshop_spin_wheels_1 extends Component {
     * And stop audio if audio of word is played
     */
     this.clearTimeSound();
-
-    // Get information for specific wheel
-    // wheelData[0] - all the letters in the particular wheel
-    // wheelData[1] - the number of letters in the wheel
-    // wheelData[2] - the index of the current letter in the alphabet list
+    /**
+    * Get information for specific wheel (see getLettersInWheels())
+    * wheelData[0] - all the letters in the particular wheel
+    * wheelData[1] - the number of letters in the wheel
+    * wheelData[2] - the index of the current letter in the alphabet list
+    */
     let wheelData = this.getLettersInWheels(wheelNumber);
     let wheel = wheelData[0];
     let wheelLength = wheelData[1];
@@ -523,13 +526,13 @@ export default class workshop_spin_wheels_1 extends Component {
     if (currentIndexInWheel < (wheelLength - 1)) {
       this['letter' + wheelNumber] = wheel[currentIndexInWheel + 1];
 
-      // export to letterSprite.js for use to stop animation
+      // export to LetterSprite.js for use to stop animation
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     } else {
       this['letter' + wheelNumber] = wheel[0];
 
-      // export to letterSprite.js for use to stop animation
+      // export to LetterSprite.js for use to stop animation
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     }
@@ -546,11 +549,12 @@ export default class workshop_spin_wheels_1 extends Component {
     * And stop audio if audio of word is played
     */
     this.clearTimeSound();
-
-    // Get information in array form for specific wheel
-    // wheelData[0] - all the letters in the particular wheel
-    // wheelData[1] - the number of letters in the wheel
-    // wheelData[2] - the index of the current letter in the alphabet list
+    /**
+    * Get information for specific wheel (see getLettersInWheels())
+    * wheelData[0] - all the letters in the particular wheel
+    * wheelData[1] - the number of letters in the wheel
+    * wheelData[2] - the index of the current letter in the alphabet list
+    */
     let wheelData = this.getLettersInWheels(wheelNumber);
     let wheel = wheelData[0];
     let wheelLength = wheelData[1];
@@ -559,13 +563,13 @@ export default class workshop_spin_wheels_1 extends Component {
     if (currentIndexInWheel > 0) {
       this['letter' + wheelNumber] = wheel[currentIndexInWheel - 1];
 
-      // export to letterSprite.js for use to stop animation
+      // export to LetterSprite.js for use to stop animation
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     } else {
       this['letter' + wheelNumber] = wheel[wheelLength - 1];
 
-      // export to letterSprite.js for use to stop animation
+      // export to LetterSprite.js for use to stop animation
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     }

@@ -1,4 +1,4 @@
-const letterSprite = {
+const LetterSprite = {
   name:"letter",
   size: {width: 150, height: 250},
   //animationTypes: ['IDLELETTER1', 'IDLELETTER2', 'IDLELETTER3', 'SPINLETTER1', 'SPINLETTER2', 'SPINLETTER3', 'STOPLETTER1', 'STOPLETTER2', 'STOPLETTER3'],
@@ -39,7 +39,7 @@ const letterSprite = {
     let letter1 = nw.letter1;
     let letter2 = nw.letter2;
     let letter3 = nw.letter3;
-    
+
     /*
     let wl = require('../../json/wordListUtil.js');
     let wheelLetters1 = wl.wheelLetters1;
@@ -86,4 +86,4 @@ const letterSprite = {
   },
 };
 
-export default letterSprite;
+export default LetterSprite;
