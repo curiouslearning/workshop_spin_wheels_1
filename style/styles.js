@@ -22,10 +22,13 @@ let SPIN_BUTTON_PADDING_TOP = 19;     // scale of paddingTop of text size on spi
 */
 if (screenWidthScale > 1) {
   ARROW_MULTIPLIER = 0.12;
+  SPIN_BUTTON_TEXT_SIZE = 40;
 } else if (screenWidthScale === 1) {
   ARROW_MULTIPLIER = 0.15;
+  SPIN_BUTTON_TEXT_SIZE = 40;
 } else {
   ARROW_MULTIPLIER = 0.12;
+  SPIN_BUTTON_TEXT_SIZE = 18;
 }
 
 // Set arrow buttons size
@@ -38,11 +41,14 @@ let DOWN_ARROW_HEIGHT = ARROW_MULTIPLIER * screenHeight;
 * Using PixelRatio to determine text size on spin button
 * This is largely for scaling the UI across phones and tablets
 */
+
+/*
 if (PixelRatio.get() <= 2) {
   SPIN_BUTTON_TEXT_SIZE = 40;
 } else {
   SPIN_BUTTON_TEXT_SIZE = 20;
 }
+*/
 
 /**
 * Using text size on spin button to determine padding top of spin button text

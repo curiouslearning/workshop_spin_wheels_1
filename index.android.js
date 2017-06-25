@@ -89,11 +89,20 @@ export default class workshop_spin_wheels_1 extends Component {
     this.letter3 = '';                                // third letter of target word
 
     // Checking pixel ratio of device to determine the scale of cell sprite
+    if (screenWidthScale >= 1) {
+      this.cellSpriteScale = 1;
+    } else {
+      //this.cellSpriteScale = 0.52;
+      this.cellSpriteScale = screenHeightScale;
+    }
+
+    /*
     if (PixelRatio.get() <= 2) {
       this.cellSpriteScale = 1;
     } else {
       this.cellSpriteScale = 0.52;
     }
+    */
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
