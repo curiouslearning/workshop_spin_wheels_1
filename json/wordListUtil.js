@@ -5,7 +5,10 @@ import spinWheelsJson from './spin_wheels';
 * to be used in the app
 */
 
-// Function to select target word list from JSON file
+/**
+* Function to select target word list from JSON file
+* wordListLevel 0 equals to level_id 001 in JSON file
+*/
 function selectWordList(wordListLevel) {
   let targetWordList = spinWheelsJson[wordListLevel].word_list;
   let wheelLetters1 = spinWheelsJson[wordListLevel].spinners[0].spinner1.letter_list;

@@ -31,6 +31,7 @@ import Sound from 'react-native-sound';
 import LetterSprite from './sprites/letterSprite/LetterSprite';
 import WordImages from './js/WordImages';
 import wordListUtil from './json/wordListUtil';
+import Curious from './js/CuriousLearningDataAPI';
 import styles from './style/styles';
 
 const baseWidth = 1024;
@@ -95,14 +96,6 @@ export default class workshop_spin_wheels_1 extends Component {
       //this.cellSpriteScale = 0.52;
       this.cellSpriteScale = screenHeightScale;
     }
-
-    /*
-    if (PixelRatio.get() <= 2) {
-      this.cellSpriteScale = 1;
-    } else {
-      this.cellSpriteScale = 0.52;
-    }
-    */
 
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
@@ -410,14 +403,7 @@ export default class workshop_spin_wheels_1 extends Component {
         TimerMixin.setTimeout( () => {
           this.showAdvancingNotice();
           //this.wellDoneSound.play();
-        }, 3500);
-
-        // Stop and release audio resources
-        //TimerMixin.setTimeout( () => {
-        //  this.wellDoneSound.stop( () => {
-        //      this.wellDoneSound.release();
-        //  });
-        //}, 10000);
+        }, 3500);        
 
       } else {
         this.wordListLevel = jsonLength - 1;

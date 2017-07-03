@@ -28,7 +28,7 @@ if (screenWidthScale > 1) {
   SPIN_BUTTON_TEXT_SIZE = 40;
 } else {
   ARROW_MULTIPLIER = 0.12;
-  SPIN_BUTTON_TEXT_SIZE = 18;
+  SPIN_BUTTON_TEXT_SIZE = 18;       // 18 or 20
 }
 
 // Set arrow buttons size
