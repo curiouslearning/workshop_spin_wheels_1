@@ -53,7 +53,10 @@ export default class workshop_spin_wheels_1 extends Component {
       buttonImageC1Opacity: 0,                    // arrow buttons of column 1 are grayed out (opacity originally at 0.3)
       buttonImageC2Opacity: 0,                    // arrow buttons of column 2 are grayed out (opacity originally at 0.3)
       buttonImageC3Opacity: 0,                    // arrow buttons of column 3 are grayed out (opacity originally at 0.3)
-      buttonDisabled: true,                       // arrow and image buttons are touch-disabled
+      buttonDisabled: true,                       // image of word is touch-disabled
+      buttonC1Disabled: true,                     // arrow buttons of column 1 are touch-disabled
+      buttonC2Disabled: true,                     // arrow buttons of column 2 are touch-disabled
+      buttonC3Disabled: true,                     // arrow buttons of column 3 are touch-disabled
       spinButtonDisabled: false,                  // spin button is active
       spinButtonBackgroundColor: 'royalblue',     // background color of the spin button
       spinButtonTextOpacity: 1,                   // Opacity of the text in the spin button
@@ -100,7 +103,13 @@ export default class workshop_spin_wheels_1 extends Component {
     // get word list from JSON file via the selectWordList function in wordListUtil.js
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
 
-    let targetSound;        // the sound file of the target word
+    let targetSound;                  // the sound file of the target word
+    let column1ArrowsOpacity;
+    let column2ArrowsOpacity;
+    let column3ArrowsOpacity;
+    let column1ButtonDisabled;
+    let column2ButtonDisabled;
+    let column3ButtonDisabled;
 
     console.log("screenWidth: " + screenWidth);
     console.log("screenHeight: " + screenHeight);
@@ -403,7 +412,7 @@ export default class workshop_spin_wheels_1 extends Component {
         TimerMixin.setTimeout( () => {
           this.showAdvancingNotice();
           //this.wellDoneSound.play();
-        }, 3500);        
+        }, 3500);
 
       } else {
         this.wordListLevel = jsonLength - 1;
@@ -456,6 +465,9 @@ export default class workshop_spin_wheels_1 extends Component {
 
   // Set the state of buttons and images when the wheels stop spinning
   onStopWheelsSetState() {
+    // Call function to find word list level and set arrow buttons opacity
+    this.setArrowButtonsStatus();
+
     // Show the image of the word first
     let timeoutId = TimerMixin.setTimeout( () => {
       this.setState({ imageOpacity: 1 });
@@ -464,16 +476,80 @@ export default class workshop_spin_wheels_1 extends Component {
     // Set the following states after 2.5 seconds to allow audio file to play completely
     let timeoutId2 = TimerMixin.setTimeout( () => {
       this.setState({
-        buttonDisabled: false,                   // Enable the arrow buttons
-        spinButtonDisabled: false,               // Enable the spin button
+        buttonDisabled: false,                        // Enable the word image button
+        spinButtonDisabled: false,                    // Enable the spin button
         spinButtonBackgroundColor: 'royalblue',
         spinButtonTextOpacity: 1,
-        animatedMatrixPointerEvents: 'auto',     // Enable the wheels (touch-enabled)
-        buttonImageC1Opacity: 1,                 // Show the arrow buttons fully
-        buttonImageC2Opacity: 1,
-        buttonImageC3Opacity: 1
+        animatedMatrixPointerEvents: 'auto',          // Enable the wheels (touch-enabled)
+        buttonImageC1Opacity: column1ArrowsOpacity,   // Show the arrow buttons fully
+        buttonImageC2Opacity: column2ArrowsOpacity,
+        buttonImageC3Opacity: column3ArrowsOpacity,
+        buttonC1Disabled: column1ButtonDisabled,
+        buttonC2Disabled: column2ButtonDisabled,
+        buttonC3Disabled: column3ButtonDisabled,
       });
     }, 4000);
+  }
+
+/**
+* Function to check word list level and set the appropriate opacity (0 or 1)
+* for the arrow buttons and enable the buttons when opacity is 1.
+* word list level 0: no arrows shown and buttons disabled
+* word list level 1: 1st column arrow buttons shown and enabled
+* word list level 2: 1st and 3rd column arrow buttons shown and enabled
+* word list level 3: 1st and 3rd column arrow buttons shown and enabled
+* word list level 4: all arrow buttons shown and enabled
+*/
+  setArrowButtonsStatus() {
+    switch(this.wordListLevel) {
+      case 0:
+        column1ArrowsOpacity = 0;
+        column2ArrowsOpacity = 0;
+        column3ArrowsOpacity = 0;
+        column1ButtonDisabled = true;
+        column2ButtonDisabled = true;
+        column3ButtonDisabled = true;
+        break;
+      case 1:
+        column1ArrowsOpacity = 1;
+        column2ArrowsOpacity = 0;
+        column3ArrowsOpacity = 0;
+        column1ButtonDisabled = false;
+        column2ButtonDisabled = true;
+        column3ButtonDisabled = true;
+        break;
+      case 2:
+        column1ArrowsOpacity = 1;
+        column2ArrowsOpacity = 0;
+        column3ArrowsOpacity = 1;
+        column1ButtonDisabled = false;
+        column2ButtonDisabled = true;
+        column3ButtonDisabled = false;
+        break;
+      case 3:
+        column1ArrowsOpacity = 1;
+        column2ArrowsOpacity = 0;
+        column3ArrowsOpacity = 1;
+        column1ButtonDisabled = false;
+        column2ButtonDisabled = true;
+        column3ButtonDisabled = false;
+        break;
+      case 4:
+        column1ArrowsOpacity = 1;
+        column2ArrowsOpacity = 1;
+        column3ArrowsOpacity = 1;
+        column1ButtonDisabled = false;
+        column2ButtonDisabled = false;
+        column3ButtonDisabled = false;
+        break;
+      default:
+        column1ArrowsOpacity = 0;
+        column2ArrowsOpacity = 0;
+        column3ArrowsOpacity = 0;
+        column1ButtonDisabled = true;
+        column2ButtonDisabled = true;
+        column3ButtonDisabled = true;
+    }
   }
 
   /**
@@ -606,26 +682,6 @@ export default class workshop_spin_wheels_1 extends Component {
     }, inactivityTimeOut);
   }
 
-  /**
-  * Function to show (but still slightly gray out) the Up/Down arrows
-  * column by column. Currently un-used
-  */
-  /*
-  showArrowButtons() {
-    let timeoutId = TimerMixin.setTimeout ( () => {
-      this.setState({ buttonImageC1Opacity: 0.7 });
-    }, 500);
-
-    let timeoutId2 = TimerMixin.setTimeout ( () => {
-      this.setState({ buttonImageC2Opacity: 0.7 });
-    }, 1000);
-
-    let timeoutId3 = TimerMixin.setTimeout ( () => {
-      this.setState({ buttonImageC3Opacity: 0.7 });
-    }, 1500);
-  }
-  */
-
   // Function to play an audio of the word formed by the wheels
   onSpinButtonPress() {
     // Stop and release previous sound
@@ -749,7 +805,7 @@ export default class workshop_spin_wheels_1 extends Component {
             <View style={ styles.upArrowsRow }>
 
               <TouchableOpacity
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC1Disabled }
                 onPress={ () => this.onArrowClickUp(1) }
                 >
 
@@ -770,7 +826,7 @@ export default class workshop_spin_wheels_1 extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC2Disabled }
                 onPress={ () => this.onArrowClickUp(2) }
                 >
 
@@ -791,7 +847,7 @@ export default class workshop_spin_wheels_1 extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC3Disabled }
                 onPress={ () => this.onArrowClickUp(3) }
                 >
 
@@ -838,7 +894,7 @@ export default class workshop_spin_wheels_1 extends Component {
             <View style={ styles.downArrowsRow }>
 
               <TouchableOpacity
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC1Disabled }
                 onPress={ () => this.onArrowClickDown(1) }
                 >
 
@@ -859,7 +915,7 @@ export default class workshop_spin_wheels_1 extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC2Disabled }
                 onPress={ () => this.onArrowClickDown(2) }
                 >
 
@@ -881,7 +937,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
               <TouchableOpacity
                 style={ styles.imageContainer }
-                disabled={ this.state.buttonDisabled }
+                disabled={ this.state.buttonC3Disabled }
                 onPress={ () => this.onArrowClickDown(3) }
                 >
 

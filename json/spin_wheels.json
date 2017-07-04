@@ -78,7 +78,7 @@
 	},{
 		"level_id" : "005",
 		"word_list" : ["cat","cam","can","cap","map","man","mat","nap","nip",
-										"nil""pam","pal","pan","pat","tan","tap","fan","fat","fin",
+										"nil","pam","pal","pan","pat","tan","tap","fan","fat","fin",
 										"fit","lap","lat","lip","lit","liz","sam","sap","sat","sal",
 										"sim","sin","sip","sit","sis","zap","zip","zit","pit","pin","pip"
 									],
