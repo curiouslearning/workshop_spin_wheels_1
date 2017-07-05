@@ -171,3 +171,12 @@ const reportCustom = function (jsonBlob) {
   KEYS = KEYS.concat(key);
   return key;
 }
+
+export default {
+  reportSection,
+  reportScore,
+  reportLevelSummary,
+  reportTouch,
+  reportResponse,
+  reportCustom,
+}

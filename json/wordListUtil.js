@@ -22,6 +22,11 @@ function selectWordList(wordListLevel) {
   return targetWordList;
 }
 
+// Function to get current level_id from JSON
+function getLevelId(wordListLevel) {
+  return spinWheelsJson[wordListLevel].level_id;
+}
+
 // Function to get number of word lists in JSON file
 function getJsonLength() {
     return spinWheelsJson.length;
@@ -29,5 +34,6 @@ function getJsonLength() {
 
 export default {
   selectWordList,
+  getLevelId,
   getJsonLength,
 };

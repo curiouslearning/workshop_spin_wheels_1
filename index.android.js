@@ -34,6 +34,12 @@ import wordListUtil from './json/wordListUtil';
 import Curious from './js/CuriousLearningDataAPI';
 import styles from './style/styles';
 
+const appId = 'SpinWheels';
+const spinButtonId = 'SpinButton';
+const arrowUpButtonId = 'UpArrow';
+const arrowDownButtonId = 'DownArrow';
+const wordImageButtonId = 'WordImage';
+const spinningWheelsId = 'SpinningWheels';
 const baseWidth = 1024;
 const baseHeight = 768;
 const screenWidth = Dimensions.get('window').width;
@@ -104,21 +110,24 @@ export default class workshop_spin_wheels_1 extends Component {
     this.targetWordList = wordListUtil.selectWordList(this.wordListLevel);
 
     let targetSound;                  // the sound file of the target word
-    let column1ArrowsOpacity;
-    let column2ArrowsOpacity;
-    let column3ArrowsOpacity;
-    let column1ButtonDisabled;
-    let column2ButtonDisabled;
-    let column3ButtonDisabled;
+    let column1ArrowsOpacity;         // opacity of arrow buttons in column 1
+    let column2ArrowsOpacity;         // opacity of arrow buttons in column 2
+    let column3ArrowsOpacity;         // opacity of arrow buttons in column 3
+    let column1ButtonDisabled;        // touchability of arrow buttons in column 1
+    let column2ButtonDisabled;        // touchability of arrow buttons in column 2
+    let column3ButtonDisabled;        // touchability of arrow buttons in column 3
+    let startTime;
+    let finishedTime;
 
-    console.log("screenWidth: " + screenWidth);
-    console.log("screenHeight: " + screenHeight);
-    console.log("pixelRatio: " + PixelRatio.get());
+    //console.log("screenWidth: " + screenWidth);
+    //console.log("screenHeight: " + screenHeight);
+    //console.log("pixelRatio: " + PixelRatio.get());
   }
 
   componentWillMount() {
       this.setState({cells: this.createCellObjsArray()});
       this.setState( () => this.startInactivityMonitorNoArrows());
+      startTime = this.getTimestamp();
   }
 
   // Get width and height of image of word
@@ -168,6 +177,12 @@ export default class workshop_spin_wheels_1 extends Component {
     const width = this.numColumns * size.width * this.cellSpriteScale;
     const height = this.numRows * size.height * this.cellSpriteScale;
     return { width, height };
+  }
+
+  // Get current timestamp
+  getTimestamp() {
+    let currentTimestamp = new Date();
+    return Number(currentTimestamp);
   }
 
   /**
@@ -237,6 +252,10 @@ export default class workshop_spin_wheels_1 extends Component {
 
       // Call stopWheels function to stop all 3 wheels together
       this.stopWheels();
+
+      // Call Curious Learning API function to create reportTouch object
+      Curious.reportTouch(appId, wordListUtil.getLevelId(this.wordListLevel), new Date(), spinButtonId);
+
     }
   }
 
@@ -288,9 +307,6 @@ export default class workshop_spin_wheels_1 extends Component {
       this.cannotSpinSound.stop( () => {
         this.cannotSpinSound.release();
       });
-
-      // Start showing the arrow buttons column by column
-      // this.showArrowButtons();
 
       // Call checkWord function to check the word formed by the wheels
       this.checkWord(this.letter1, this.letter2, this.letter3);
@@ -405,13 +421,21 @@ export default class workshop_spin_wheels_1 extends Component {
       let jsonLength = wordListUtil.getJsonLength();
 
       if (this.wordListLevel < (jsonLength - 1)) {
+        // Call Curious Learning API function to create reportSection object
+        finishedTime = this.getTimestamp();
+        let totalTime = 0;
+        totalTime = (finishedTime - startTime)    // time in milliseconds
+        Curious.reportSection(appId, wordListUtil.getLevelId(this.wordListLevel), startTime, totalTime);
+        //console.log('startTime: ' + startTime);
+        //console.log('finishedTime: ' + finishedTime);
+
+        // Move up one level
         this.wordListLevel = this.wordListLevel + 1;
         console.log('wordlistlevel: ' + this.wordListLevel);
 
         // Announce going to next level
         TimerMixin.setTimeout( () => {
           this.showAdvancingNotice();
-          //this.wellDoneSound.play();
         }, 3500);
 
       } else {
@@ -442,7 +466,7 @@ export default class workshop_spin_wheels_1 extends Component {
       'SPIN WHEELS GAME',
       'Well done! 50% of word list completed. Going to next level!',
       [
-        {text: 'OK', onPress: (cellObj, position) => this.cellPressed(cellObj, 0)},
+        {text: 'OK', onPress: (cellObj, position) => [this.cellPressed(cellObj, 0), startTime = this.getTimestamp()]},
       ],
       { cancelable: false }
     )
@@ -607,6 +631,11 @@ export default class workshop_spin_wheels_1 extends Component {
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     }
+
+    // Call Curious Learning API function to create reportTouch object
+    let arrowId = arrowDownButtonId + wheelNumber;
+    Curious.reportTouch(appId, wordListUtil.getLevelId(this.wordListLevel), new Date(), arrowId);
+
   }
 
   /**
@@ -644,6 +673,11 @@ export default class workshop_spin_wheels_1 extends Component {
       exports['letter' + wheelNumber] = this['letter' + wheelNumber];
       this.stopIndividualWheels(wheelNumber);
     }
+
+    // Call Curious Learning API function to create reportTouch object
+    let arrowId = arrowUpButtonId + wheelNumber;
+    Curious.reportTouch(appId, wordListUtil.getLevelId(this.wordListLevel), new Date(), arrowId);
+
   }
 
   /**
@@ -787,8 +821,8 @@ export default class workshop_spin_wheels_1 extends Component {
     if (this.state.containerLeftDimensions) {
       let { containerLeftDimensions } = this.state
       let { width, height } = containerLeftDimensions
-      console.log('containerLeft Width: ' + width);
-      console.log('containerLeft Height: ' + height);
+      //console.log('containerLeft Width: ' + width);
+      //console.log('containerLeft Height: ' + height);
     }
 
     // Variables used in the spin animation of the spin button text
@@ -884,7 +918,7 @@ export default class workshop_spin_wheels_1 extends Component {
                 cellSpriteScale={ this.cellSpriteScale }
                 cellObjs={ this.state.cells }
                 scale={ this.scale }
-                onPress={ () => this.onSpinButtonPress() }
+                onPress={ () => [this.onSpinButtonPress(), Curious.reportTouch(appId, wordListUtil.getLevelId(this.wordListLevel), new Date(), spinningWheelsId)] }
                 onPressIn={ () => this.setState({ animatedSpriteMatrixOpacity: 0.3 }) }
                 onPressOut={ () => this.setState({ animatedSpriteMatrixOpacity: 1 }) }
               />
@@ -991,7 +1025,7 @@ export default class workshop_spin_wheels_1 extends Component {
 
           <TouchableOpacity
             disabled={ this.state.buttonDisabled }
-            onPress={ () => this.onSpinButtonPress() }
+            onPress={ () => [this.onSpinButtonPress(), Curious.reportTouch(appId, wordListUtil.getLevelId(this.wordListLevel), new Date(), wordImageButtonId)] }
             >
             <Image
               style={
