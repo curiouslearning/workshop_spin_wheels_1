@@ -3,9 +3,7 @@ CL-Workshops 5/17 Spin the Wheels project 1
 
 ## Getting Started (adapted from workshop's Specification Brief)
 
-![Spin Wheels Game](/images/spinwheel.gif)
-
-Format: ![Spin Wheels Game](url)
+![Spin Wheels Game](/images/spinwheelsintro.gif)
 
 The objective of the game is to allow users to put order to a set of
 letters to spell a word. The game currently has three independent
