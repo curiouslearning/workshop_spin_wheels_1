@@ -1,9 +1,10 @@
-## Project Description (adapted from workshop's Specification Brief & assignment 1)
+## Project Description (adapted from workshop's Specification Brief & Assignment 1)
 
 ### Project Title: CL-Workshops 5/17 Spin the Wheels Project 1
 
 ### Animated GIF of App
 ![Spin Wheels Game](/images/readmeimages/spinwheelsintro.gif)
+
 Figure 1. Animated GIF of the app.
 
 ### Goal/Objective
@@ -62,7 +63,7 @@ animating the spinning and stopping of the spinning letters.
 ### Data Collection Functions
 This app uses 2 of the 6 functions from Curious Learning Data Collection API
 (CuriousLearningDataAPI.js) to collect usage data so that application usage
-can be analyzed.
+can be analyzed. The file is located in the './js/' folder.
 
 1. reportSection function is used to collect data regarding the different
 levels of the app that a user has completed. This function is called
@@ -87,8 +88,8 @@ Curious Learning team for review. After the review, wireframes of the proposed
 app were created and submitted for review. See Figure 2 below.
 
 ![Spin Wheels Game](/images/readmeimages/wireframe01.png)
-Figure 2. Animated GIF of one of the wireframes created.
 
+Figure 2. Image of one of the wireframes created.
 
 ### Weeks 3 & 4:
 Actual coding of the app began. The render() function and styles were first
@@ -97,6 +98,7 @@ was implemented. A minimum viable product (Figure 3) was then created and used
 to conduct a User Testing Session.
 
 ![Spin Wheels Game](/images/readmeimages/spin_by_wheel.gif)
+
 Figure 3. Animated GIF of the minimum viable product used in the User Testing
 Session.
 
@@ -123,5 +125,6 @@ future developers who are interested in this project.
 
 ## Acknowledgements
 1. Boink sound is from: https://www.freesound.org/s/61847/
-2. The Curious Learning Team that has provided wonderful guidance, suggestions,
+1. Many of the images of spelt words are from https://www.shutterstock.com
+1. The Curious Learning Team that has provided wonderful guidance, suggestions,
 and assistance.
